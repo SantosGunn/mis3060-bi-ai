@@ -1,0 +1,130 @@
+WILDCAT CAPITAL - TRANSACTION DATA PROFILE (HW02)
+Source file: data\raw\fact_transactions.csv
+Author: Santos Gunningham
+Run timestamp: 2026-09-23 15:45:58
+
+==============================================================================
+[2] DATASET SHAPE
+==============================================================================
+Rows:    298,772
+Columns: 9
+
+==============================================================================
+[3] COLUMN NAMES AND DATA TYPES (AS LOADED)
+==============================================================================
+               dtype
+column              
+txn_id         int64
+client_id      int64
+advisor_id     int64
+security_id  float64
+txn_date         str
+txn_type         str
+shares       float64
+price        float64
+amount       float64
+
+==============================================================================
+[4] MISSING VALUES PER COLUMN
+==============================================================================
+             missing_count  missing_pct
+column                                 
+txn_id                   0         0.00
+client_id                0         0.00
+advisor_id               0         0.00
+security_id         101597        34.00
+txn_date                 0         0.00
+txn_type                 0         0.00
+shares              101597        34.00
+price               101597        34.00
+amount                   0         0.00
+Total missing cells: 304,791
+
+==============================================================================
+[5] DESCRIPTIVE STATISTICS (NUMERIC COLUMNS)
+==============================================================================
+                 count       mean       std     min       25%     median        75%        max
+txn_id      298,772.00 149,386.50 86,248.19    1.00 74,693.75 149,386.50 224,079.25 298,772.00
+client_id   298,772.00   1,249.66    722.72    1.00    625.00   1,246.00   1,873.00   3,192.00
+advisor_id  298,772.00      12.80      7.27    1.00      6.00      13.00      19.00      25.00
+security_id 197,175.00     249.32    144.27    1.00    125.00     248.00     375.00     500.00
+shares      197,175.00     247.77    147.69 -499.63    123.53     248.77     373.83     500.00
+price       197,175.00     255.13    141.53   10.00    132.76     255.09     377.93     500.00
+amount      298,772.00  54,075.17 50,494.32   13.33 12,078.93  41,220.49  81,827.01 249,302.33
+
+==============================================================================
+[6] TRANSACTIONS BY TXN_TYPE (MOST TO LEAST FREQUENT)
+==============================================================================
+              count   pct
+txn_type                 
+Buy           83556 27.97
+Sell          59755 20.00
+Dividend      53864 18.03
+Deposit       35981 12.04
+Advisory Fee  35766 11.97
+Withdrawal    29850  9.99
+Total: 298,772
+
+==============================================================================
+[7] UNIQUE CLIENTS, ADVISORS, AND SECURITIES (EXCLUDING MISSING)
+==============================================================================
+Clients          2,700   (column: client_id)
+Advisors            25   (column: advisor_id)
+Securities         500   (column: security_id)
+
+==============================================================================
+[8] DATE RANGE OF TXN_DATE
+==============================================================================
+Earliest txn_date: 2020-01-01
+Latest txn_date:   2024-12-30
+
+==============================================================================
+[9] DUPLICATE TXN_ID CHECK
+==============================================================================
+Duplicate entries beyond first occurrence: 0
+Distinct txn_id values that repeat:        0
+
+==============================================================================
+[10] AMOUNT: MEAN, MEDIAN, SKEWNESS
+==============================================================================
+Mean:     54,075.17
+Median:   41,220.49
+Skewness: 1.1463
+
+==============================================================================
+[11] AMOUNT BY TXN_TYPE (SORTED BY MEAN AMOUNT, HIGH TO LOW)
+==============================================================================
+             txn_count mean_amount median_amount
+txn_type                                        
+Dividend        53,864   64,077.30     48,805.60
+Buy             83,556   63,738.49     47,893.58
+Sell            59,755   63,635.55     48,080.16
+Deposit         35,981   50,588.07     50,760.33
+Withdrawal      29,850   49,997.34     49,843.42
+Advisory Fee    35,766    7,375.17        859.12
+
+==============================================================================
+[12] CORRELATION MATRIX: SHARES, PRICE, AMOUNT (PEARSON)
+==============================================================================
+        shares  price  amount
+shares    1.00   0.00    0.65
+price     0.00   1.00    0.64
+amount    0.65   0.64    1.00
+
+Pairs ranked by absolute correlation (strongest first):
+  1. shares & amount: r = 0.65  (|r| = 0.65)
+  2. price & amount: r = 0.64  (|r| = 0.64)
+  3. shares & price: r = 0.00  (|r| = 0.00)
+
+==============================================================================
+[13] SHARES BY TXN_TYPE: MIN, MAX, NEGATIVE COUNT
+==============================================================================
+              min_shares  max_shares  negative_shares  missing_shares
+txn_type                                                             
+Advisory Fee         NaN         NaN                0           35766
+Buy              -499.63      500.00              836               0
+Deposit              NaN         NaN                0           35981
+Dividend            1.00      500.00                0               0
+Sell                1.00      500.00                0               0
+Withdrawal           NaN         NaN                0           29850
+(min/max ignore missing shares; missing values are not replaced with 0)
