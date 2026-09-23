@@ -122,6 +122,8 @@ Claude flagged that txn_date is stored as text rather than a datetime type. It n
 Yes, they could be legitimate reversals, and I overstated it. The data supports "suspicious and inconsistent," not "almost certainly errors." Preserving and flagging them is the right call.
 Pearson only measures straight-line relationships. A U-shaped, curved, or variance-changing relationship can have r ≈ 0 and still be strongly dependent.
 
+Claude also recommended checking matching original purchases, source-system audit logs, custodian statements, and the data dictionary to distinguish sign errors from legitimate reversals.
+
 ## 2C — Business Check & Cross-Validation
 
 ### 1. Missing Security Information
