@@ -1,0 +1,22 @@
+URL: https://www.sec.gov/Archives/edgar/data/104169/000010416926000008/wmt-20260108.htm
+Filed: 2026-01-08
+
+===== ITEM 5.02 SECTION =====
+Effective January 8, 2026, the Board of Directors (the "Board") of Walmart Inc. ("Walmart") appointed Shishir Mehrotra, age 46, as a member of the Board. Mr. Mehrotra has also been appointed to the Compensation and Management Development Committee and the Technology and eCommerce Committee of the Board. There is no arrangement or understanding between Mr. Mehrotra and any other persons or entities pursuant to which Mr. Mehrotra was appointed as a director.
+Upon his appointment to the Board, Mr. Mehrotra became entitled to a prorated portion of the non-management directors' compensation for the term ending on the date of Walmart's 2026 Annual Shareholders' Meeting. The components of Walmart's non-management director compensation were disclosed in Walmart's proxy statement dated April 24, 2025, relating to the Annual Shareholders' Meeting held on June 5, 2025, and as slightly modified by the Board on June 5, 2025 for the annual amounts. As part of his non-management director compensation, on January 8, 2026, Mr. Mehrotra received a prorated portion of the $230,000 annual stock award and will receive a prorated portion of the $115,000 annual retainer payable to non-management directors. The annual retainer will be paid quarterly in arrears through the 2026 Annual Shareholders' Meeting, and Mr. Mehrotra may elect to receive these quarterly retainers in cash or Walmart common stock, defer in stock units, defer in cash in an interest-bearing account, or receive in any combination thereof.
+A copy of the press release announcing Mr. Mehrotra's appointment to the Board is attached as Exhibit 99.1 to this current report on Form 8-K and incorporated herein.
+
+===== SENTENCES =====
+[0] Effective January 8, 2026, the Board of Directors (the "Board") of Walmart Inc. ("Walmart") appointed Shishir Mehrotra, age 46, as a member of the Board.
+[1] Mr. Mehrotra has also been appointed to the Compensation and Management Development Committee and the Technology and eCommerce Committee of the Board.
+[2] There is no arrangement or understanding between Mr. Mehrotra and any other persons or entities pursuant to which Mr. Mehrotra was appointed as a director.
+[3] Upon his appointment to the Board, Mr. Mehrotra became entitled to a prorated portion of the non-management directors' compensation for the term ending on the date of Walmart's 2026 Annual Shareholders' Meeting.
+[4] The components of Walmart's non-management director compensation were disclosed in Walmart's proxy statement dated April 24, 2025, relating to the Annual Shareholders' Meeting held on June 5, 2025, and as slightly modified by the Board on June 5, 2025 for the annual amounts.
+[5] As part of his non-management director compensation, on January 8, 2026, Mr. Mehrotra received a prorated portion of the $230,000 annual stock award and will receive a prorated portion of the $115,000 annual retainer payable to non-management directors.
+[6] The annual retainer will be paid quarterly in arrears through the 2026 Annual Shareholders' Meeting, and Mr. Mehrotra may elect to receive these quarterly retainers in cash or Walmart common stock, defer in stock units, defer in cash in an interest-bearing account, or receive in any combination thereof.
+[7] A copy of the press release announcing Mr. Mehrotra's appointment to the Board is attached as Exhibit 99.1 to this current report on Form 8-K and incorporated herein.
+
+===== EXTRACTED EVENTS =====
+{'event_type': 'appointment', 'person_name': 'Shishir Mehrotra', 'title': 'Director', 'effective_date': '2026-01-08'}
+
+===== REVIEW NOTES =====

@@ -1,0 +1,29 @@
+URL: https://www.sec.gov/Archives/edgar/data/320193/000114036126015711/ef20071035_8k.htm
+Filed: 2026-04-20
+
+===== ITEM 5.02 SECTION =====
+On April 20, 2026, Apple Inc. ("Apple") announced that Tim Cook will transition from his role as Chief Executive Officer to Executive Chair of Apple's Board of Directors (the "Board"), effective September 1, 2026 (the "Transition Date"). On April 17, 2026, the Board appointed John Ternus, Apple's Senior Vice President of Hardware Engineering, as Chief Executive Officer and a member of the Board, in each case effective on the Transition Date. Art Levinson, current Chair of the Board, will become Lead Independent Director on the Transition Date.
+
+Mr. Ternus, 50, joined Apple in 2001 and assumed his current position in 2021. Mr. Ternus's previous positions at Apple include Vice President, Hardware Engineering. Apple believes Mr. Ternus will bring to the Board extensive executive leadership experience in the technology industry, including engineering, product design and innovation.
+
+There are no family relationships between Mr. Ternus and any director or executive officer of Apple that would be required to be disclosed pursuant to Item 401(d) of Regulation S-K, and there are no transactions between Mr. Ternus and Apple that would be required to be disclosed pursuant to Item 404(a) of Regulation S-K.
+
+In connection with his appointment, Apple and Mr. Ternus will enter into Apple's standard indemnification agreement for directors and executive officers. Apple intends to file an amendment to this filing containing the information called for by Item 5.02(c)(3) of Form 8-K within four business days after the information is determined or becomes available.
+
+===== SENTENCES =====
+[0] On April 20, 2026, Apple Inc. ("Apple") announced that Tim Cook will transition from his role as Chief Executive Officer to Executive Chair of Apple's Board of Directors (the "Board"), effective September 1, 2026 (the "Transition Date").
+[1] On April 17, 2026, the Board appointed John Ternus, Apple's Senior Vice President of Hardware Engineering, as Chief Executive Officer and a member of the Board, in each case effective on the Transition Date.
+[2] Art Levinson, current Chair of the Board, will become Lead Independent Director on the Transition Date.
+[3] Mr. Ternus, 50, joined Apple in 2001 and assumed his current position in 2021.
+[4] Mr. Ternus's previous positions at Apple include Vice President, Hardware Engineering.
+[5] Apple believes Mr. Ternus will bring to the Board extensive executive leadership experience in the technology industry, including engineering, product design and innovation.
+[6] There are no family relationships between Mr. Ternus and any director or executive officer of Apple that would be required to be disclosed pursuant to Item 401(d) of Regulation S-K, and there are no transactions between Mr. Ternus and Apple that would be required to be disclosed pursuant to Item 404(a) of Regulation S-K.
+[7] In connection with his appointment, Apple and Mr. Ternus will enter into Apple's standard indemnification agreement for directors and executive officers.
+[8] Apple intends to file an amendment to this filing containing the information called for by Item 5.02(c)(3) of Form 8-K within four business days after the information is determined or becomes available.
+
+===== EXTRACTED EVENTS =====
+{'event_type': 'departure', 'person_name': 'Tim Cook', 'title': 'Chief Executive Officer', 'effective_date': '2026-09-01'}
+{'event_type': 'appointment', 'person_name': 'John Ternus', 'title': 'Chief Executive Officer', 'effective_date': '2026-04-17'}
+{'event_type': 'appointment', 'person_name': 'Art Levinson', 'title': 'Lead Independent Director', 'effective_date': 'NOT_FOUND'}
+
+===== REVIEW NOTES =====

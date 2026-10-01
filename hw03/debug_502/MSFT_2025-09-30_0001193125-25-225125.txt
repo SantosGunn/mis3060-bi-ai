@@ -1,0 +1,16 @@
+URL: https://www.sec.gov/Archives/edgar/data/789019/000119312525225125/d863209d8k.htm
+Filed: 2025-09-30
+
+===== ITEM 5.02 SECTION =====
+(b) On September 24, 2025, Carlos A. Rodriguez, a member of the Board of Directors of Microsoft Corporation (the "Company"), informed the Company of his decision not to stand for re-election at the Company's 2025 annual shareholder meeting (the "Annual Meeting"). Mr. Rodriguez will continue to serve as a director until the Annual Meeting. His decision not to stand for re-election is for personal reasons and not as a result of any disagreement with management on any matter relating to the Company's operations, policies, or practices. The Company thanks Mr. Rodriguez for his contributions during his tenure as a director, Chair of the Compensation Committee, and member of the Audit Committee.
+
+===== SENTENCES =====
+[0] (b) On September 24, 2025, Carlos A. Rodriguez, a member of the Board of Directors of Microsoft Corporation (the "Company"), informed the Company of his decision not to stand for re-election at the Company's 2025 annual shareholder meeting (the "Annual Meeting").
+[1] Mr. Rodriguez will continue to serve as a director until the Annual Meeting.
+[2] His decision not to stand for re-election is for personal reasons and not as a result of any disagreement with management on any matter relating to the Company's operations, policies, or practices.
+[3] The Company thanks Mr. Rodriguez for his contributions during his tenure as a director, Chair of the Compensation Committee, and member of the Audit Committee.
+
+===== EXTRACTED EVENTS =====
+{'event_type': 'departure', 'person_name': 'Carlos A. Rodriguez', 'title': 'Director', 'effective_date': 'NOT_FOUND'}
+
+===== REVIEW NOTES =====

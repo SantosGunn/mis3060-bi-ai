@@ -1,0 +1,76 @@
+URL: https://www.sec.gov/Archives/edgar/data/1045810/000104581026000024/nvda-20260302.htm
+Filed: 2026-03-06
+
+===== ITEM 5.02 SECTION =====
+Adoption of Fiscal Year 2027 Variable Compensation Plan
+
+On March 2, 2026, the Compensation Committee of the Board of Directors, or the Board, of NVIDIA Corporation, or the Company, adopted the Variable Compensation Plan for Fiscal Year 2027, or the 2027 Plan, which provides eligible executive officers the opportunity to earn a variable cash payment based on the level of achievement by the Company of certain corporate performance goals, or the Performance Goals, during fiscal year 2027. The Company operates on a fiscal year ending on the last Sunday in January and designates its fiscal year by the year in which that fiscal year ends. Fiscal year 2027 refers to the Company's fiscal year ending January 31, 2027.
+
+The Compensation Committee has set the Performance Goals for fiscal year 2027 based upon the achievement of specified fiscal year 2027 revenue and has established threshold compensation plan, base compensation plan, and stretch compensation plan levels.
+
+Unless otherwise determined by the Compensation Committee, a participant must remain an employee through the payment date under the 2027 Plan to be eligible to earn an award.
+
+The following table sets forth the respective target award opportunities for base compensation plan achievement for the Company's named executive officers under the 2027 Plan:
+
+Named Executive Officer
+Target Award Opportunity for Base Compensation Plan
+Achievement
+Target Award Opportunity for
+Base Compensation Plan
+Achievement as a % of
+Fiscal Year 2027 Base Salary
+
+Jen-Hsun Huang
+President and Chief Executive Officer
+$4,000,000 | | 200%
+
+Colette M. Kress
+Executive Vice President and Chief Financial Officer
+$1,500,000 | | 150%
+Ajay K. Puri
+Executive Vice President, Worldwide Field Operations
+$1,500,000 | | 150%
+Debora Shoquist
+Executive Vice President, Operations
+$1,500,000 | | 150%
+Timothy S. Teter
+Executive Vice President, General Counsel and Secretary
+$1,500,000 | | 150%
+
+The foregoing description is subject to, and qualified in its entirety by, the 2027 Plan, which is filed with this report as Exhibit 10.1 and is incorporated herein by reference.
+
+===== SENTENCES =====
+[0] Adoption of Fiscal Year 2027 Variable Compensation Plan
+[1] On March 2, 2026, the Compensation Committee of the Board of Directors, or the Board, of NVIDIA Corporation, or the Company, adopted the Variable Compensation Plan for Fiscal Year 2027, or the 2027 Plan, which provides eligible executive officers the opportunity to earn a variable cash payment based on the level of achievement by the Company of certain corporate performance goals, or the Performance Goals, during fiscal year 2027.
+[2] The Company operates on a fiscal year ending on the last Sunday in January and designates its fiscal year by the year in which that fiscal year ends.
+[3] Fiscal year 2027 refers to the Company's fiscal year ending January 31, 2027.
+[4] The Compensation Committee has set the Performance Goals for fiscal year 2027 based upon the achievement of specified fiscal year 2027 revenue and has established threshold compensation plan, base compensation plan, and stretch compensation plan levels.
+[5] Unless otherwise determined by the Compensation Committee, a participant must remain an employee through the payment date under the 2027 Plan to be eligible to earn an award.
+[6] The following table sets forth the respective target award opportunities for base compensation plan achievement for the Company's named executive officers under the 2027 Plan:
+[7] Named Executive Officer
+[8] Target Award Opportunity for Base Compensation Plan
+[9] Achievement
+[10] Target Award Opportunity for
+[11] Base Compensation Plan
+[12] Achievement as a % of
+[13] Fiscal Year 2027 Base Salary
+[14] Jen-Hsun Huang
+[15] President and Chief Executive Officer
+[16] $4,000,000 | | 200%
+[17] Colette M. Kress
+[18] Executive Vice President and Chief Financial Officer
+[19] $1,500,000 | | 150%
+[20] Ajay K. Puri
+[21] Executive Vice President, Worldwide Field Operations
+[22] $1,500,000 | | 150%
+[23] Debora Shoquist
+[24] Executive Vice President, Operations
+[25] $1,500,000 | | 150%
+[26] Timothy S. Teter
+[27] Executive Vice President, General Counsel and Secretary
+[28] $1,500,000 | | 150%
+[29] The foregoing description is subject to, and qualified in its entirety by, the 2027 Plan, which is filed with this report as Exhibit 10.1 and is incorporated herein by reference.
+
+===== EXTRACTED EVENTS =====
+
+===== REVIEW NOTES =====
