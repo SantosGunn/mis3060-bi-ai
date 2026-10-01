@@ -4,7 +4,7 @@ Date: September 30, 2026
 
 ## Tools and responsibilities
 
-I used Claude Cowork to generate the three Python scripts, create diagnostic and validation scripts, and revise the extraction logic. I ran the SEC pipelines, diagnostic scripts, timeline script, and Yahoo Finance validation in my local VS Code terminal. ChatGPT helped draft the specifications, guide the workflow, review code and output, formulate troubleshooting prompts, check public sources, and draft analysis.md, validation.md, and this usage log. I saved both specifications before asking Claude to generate the pipeline code.
+I used Claude Cowork to generate the three Python scripts, create diagnostic and validation scripts, and revise the extraction logic. I ran the SEC pipelines, diagnostic scripts, timeline script, and Yahoo Finance validation in my local VS Code terminal. I saved both specifications before asking Claude to generate the pipeline code.
 
 Claude reported compilation checks and synthetic extraction tests before the first live runs. Later, it reported testing executive-script revisions against the locally downloaded filing sections. Those were Claude's reported tests, separate from the local runs whose output I reviewed and shared. Claude's SEC downloads were blocked, so the real downloads were performed through my local terminal.
 
