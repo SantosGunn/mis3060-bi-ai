@@ -895,8 +895,8 @@ def readme_text(work, quarantine, changes) -> str:
         "unreliable. Join to dim_date.is_trading_day to identify them.",
         "10. **Snapshot months without a fee row (Issue 12).** No fee rows were created. If billing data is "
         "missing, billed fees are understated.",
-        "11. **Advisory Fee transactions do not match fact_fees (Issue 13).** None of the overlapping client-months "
-        "match. Keep both; **do not add or combine them in one measure** until Wildcat explains the relationship. "
+        "11. **Advisory Fee transactions do not match fact_fees (Issue 13).** Only 1 of the 28,746 overlapping "
+        "client-months agrees within $0.01 (exact decimal comparison); the other 28,745 do not. Keep both; **do not add or combine them in one measure** until Wildcat explains the relationship. "
         "fact_fees is the internally reconciled billed-fee measure; it is not verified recognized revenue.",
         "12. **Dividend shares (Issue 14).** The meaning of shares on Dividend rows is unresolved. A holdings "
         "comparison was exploratory only (no opening positions, transfers, reinvestment lots or corporate "

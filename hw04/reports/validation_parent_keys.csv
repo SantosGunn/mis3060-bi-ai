@@ -1,0 +1,27 @@
+stage,relationship,parent_table,parent_key,parent_rows,parent_blank_keys,duplicate_key_rows,distinct_duplicate_keys,unique
+raw,dim_client.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+raw,dim_security.benchmark_id -> dim_benchmark.benchmark_id,dim_benchmark,benchmark_id,8,0,0,0,True
+raw,fact_fees.client_id -> dim_client.client_id,dim_client,client_id,2525,0,0,0,True
+raw,fact_fees.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+raw,fact_portfolio_snapshot.client_id -> dim_client.client_id,dim_client,client_id,2525,0,0,0,True
+raw,fact_portfolio_snapshot.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+raw,fact_portfolio_snapshot.benchmark_id -> dim_benchmark.benchmark_id,dim_benchmark,benchmark_id,8,0,0,0,True
+raw,fact_transactions.client_id -> dim_client.client_id,dim_client,client_id,2525,0,0,0,True
+raw,fact_transactions.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+raw,fact_transactions.security_id -> dim_security.security_id,dim_security,security_id,500,0,0,0,True
+raw,fact_fees.fee_date -> dim_date.date,dim_date,date,1827,0,0,0,True
+raw,fact_portfolio_snapshot.snapshot_date -> dim_date.date,dim_date,date,1827,0,0,0,True
+raw,fact_transactions.txn_date -> dim_date.date,dim_date,date,1827,0,0,0,True
+clean,dim_client.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+clean,dim_security.benchmark_id -> dim_benchmark.benchmark_id,dim_benchmark,benchmark_id,8,0,0,0,True
+clean,fact_fees.client_id -> dim_client.client_id,dim_client,client_id,2500,0,0,0,True
+clean,fact_fees.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+clean,fact_portfolio_snapshot.client_id -> dim_client.client_id,dim_client,client_id,2500,0,0,0,True
+clean,fact_portfolio_snapshot.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+clean,fact_portfolio_snapshot.benchmark_id -> dim_benchmark.benchmark_id,dim_benchmark,benchmark_id,8,0,0,0,True
+clean,fact_transactions.client_id -> dim_client.client_id,dim_client,client_id,2500,0,0,0,True
+clean,fact_transactions.advisor_id -> dim_advisor.advisor_id,dim_advisor,advisor_id,25,0,0,0,True
+clean,fact_transactions.security_id -> dim_security.security_id,dim_security,security_id,500,0,0,0,True
+clean,fact_fees.fee_date -> dim_date.date,dim_date,date,1827,0,0,0,True
+clean,fact_portfolio_snapshot.snapshot_date -> dim_date.date,dim_date,date,1827,0,0,0,True
+clean,fact_transactions.txn_date -> dim_date.date,dim_date,date,1827,0,0,0,True

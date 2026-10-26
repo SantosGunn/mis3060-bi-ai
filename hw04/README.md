@@ -1,6 +1,6 @@
 # HW04 – Wildcat Capital data-quality audit
 
-Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Part C (`scripts/02_clean.py`) is reviewed; Parts D–E are not started.
+Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Part C (`scripts/02_clean.py`) is reviewed; Part D (`scripts/03_validate.py`) is reviewed; Part E is not started.
 
 ## Structure
 
@@ -12,6 +12,9 @@ hw04/
   data/audit/                cleaning_log.csv, value_changes.csv, quarantine_*.csv
   scripts/01_profile.py      Part A audit / profiler
   scripts/02_clean.py        Part C cleaning program (implements decision_log.md)
+  scripts/03_validate.py     Part D RI function, rules, reconciliations, IQR flags, scorecard
+  reports/data_quality_scorecard.csv  Part D scorecard (8 tables x raw/clean)
+  reports/validation_*.csv, validation_definitions.md  Part D detail and definitions
   scripts/verify_setup.py    stale copy of the pre-review profiler (see "Noted, not changed")
   reports/profile_raw.csv    per-column profile
   reports/dq_summary_raw.csv one row per check
@@ -25,6 +28,7 @@ From `hw04/`:
 ```
 .\.venv\Scripts\python.exe scripts\01_profile.py
 .\.venv\Scripts\python.exe scripts\02_clean.py
+.\.venv\Scripts\python.exe scripts\03_validate.py
 ```
 
 `02_clean.py` stops with a named error, before writing anything, if any precondition or post-check fails.
@@ -51,7 +55,7 @@ Severity follows the assignment: ERROR, WARN, INFO. PASS rows are also kept, so 
 - `fact_portfolio_snapshot.return_ytd`: 300 values carry a `%` suffix. All 300 reconcile with alpha only after dividing by 100.
 - `dim_client`: 76 blank `risk_profile` values and 78 full state names (e.g. `Pennsylvania`).
 - `dim_client`: 25 near-duplicate pairs whose `last_name` differs by a prefix: 23 copies are truncated (`Jacobso`), 2 are extended (`Pacen`, `Leen`). In every pair, the copy is an id in 2501–2525 with no facts, and the original id carries all the facts.
-- Buy/Sell on weekends (40,649 rows). Snapshot months with no fee row (7,350). Advisory Fee transactions never reconcile to `fact_fees` (median ratio 3.11). 2,410 transactions after an inactive client's last snapshot.
+- Buy/Sell on weekends (40,649 rows). Snapshot months with no fee row (7,350). Advisory Fee transactions reconcile to `fact_fees` in only 1 of 28,746 overlapping client-months (median ratio 3.11; corrected in Part D, see Round 5). 2,410 transactions after an inactive client's last snapshot.
 
 ### Assumptions (inferred, not documented)
 
@@ -140,6 +144,39 @@ Reviewed `scripts/02_clean.py` and its outputs against Part C and the committed 
 | NaN could pass silently, because NaN compares False. Step 5 found and post-checked negative shares with `as_float(shares) < 0`, so an unparseable value such as `(5)` would be neither fixed nor caught. Step 6's after-check counted `gap > tol`, so a blank or non-numeric benchmark or alpha would "reconcile". Step 7 gave an unparseable return or alpha a flag of 0. | Added `numeric()`, a stop rule requiring every relevant value to parse: shares and price on traded rows, all amounts, benchmark, alpha and non-`%` returns, converted returns, AUM and aum_basis. Added `n_outside_tol()`, which counts `not(gap <= tol)` so NaN is a failure. Step 5 also re-checks after the edit that shares are still numeric. Tested by injecting `(5)`, `n/a`, a blank and `abc` into copies of the data: each stops with a named `CleaningError`. On the real data, outputs are unchanged. |
 | The README_clean duplicate-client limitation said "every column except last_name". | Now says "except client_id and last_name (first_name equal)", matching the decision log. |
 | `hw04/.gitignore`: the root `*.csv` rule hid the Part C deliverables. | Added `!data/clean/*.csv` and `!data/audit/*.csv`. All 12 clean and audit CSVs are now visible to git; `data/raw/` and `.venv/` are still ignored. |
+
+### Round 5 – Part D validation review, and fee-reconciliation correction
+
+Reviewed `scripts/03_validate.py` and its 8 reports against Part D. Before any change, rerunning the validator reproduced every report byte-for-byte, which gave a clean baseline. The checks below were done independently, reading the reports back and calling the RI function directly.
+
+**Verified, no change needed**
+- **Reusable RI function:** there is one function, `check_referential_integrity(fact_df, fact_key, dim_df, dim_key)`. It returns match rate, orphan rows, distinct orphan keys and null-key rate, plus the counts behind them. Edge cases tested:
+  - Blank keys are excluded from the match rate.
+  - `45.0` is an exact-text orphan.
+  - An empty or all-blank child gives N/A, not 0% or 100%.
+  - Blank parent keys never match.
+  - A missing column raises an error.
+  - Parent-key uniqueness is checked separately; it holds in every relationship at both stages.
+- **13 relationships × 2 stages = 26 rows:** in every row, matched + orphans = eligible and eligible + blank = rows. Raw has two problems: `client_id` at 99.933% (200 orphans) and `security_id` at 0% (197,175 `45.0` keys). Clean is 100% on all 13 with 0 orphans.
+- **Rules:** 75 per stage (44 hard, 23 inferred convention, 8 plausibility). On every rule, passed + failed = eligible and eligible + unassessable + not applicable = rows. Unassessable inputs are counted separately and never as passes; in raw these are 76 blank risk profiles and 300 `%` returns × 3 rules. Plausibility rules are reported as warnings and kept out of % rule pass.
+- **Cross-table reconciliations:** R1 (fee AUM vs snapshot AUM, one-to-one), R2a–c (fact advisor = client's advisor), R3 (account type), and R4 (Advisory Fee vs fact_fees, a known discrepancy excluded from scores). Join cardinality is checked before each join, and rows with blank or invalid keys are excluded first and counted.
+- **IQR flags:** on `dim_client.initial_aum` (pooled) and `fact_transactions.amount` (by txn_type), with fences from the clean stage applied to both stages. Every flag recomputes from the published fences, only assessable rows can be flagged, and the definitions state that "flagged means unusual, not necessarily wrong".
+- **Scorecard:** 16 rows (8 tables × raw/clean). Every percentage equals its published numerator/denominator, and N/A appears only where the denominator does not exist (tables with no outgoing relationship). Rule-pass figures equal the sums of the rule rows. Denominators are documented in `validation_definitions.md`.
+
+**Changed**
+
+| Flagged | Change |
+|---|---|
+| Pandas deprecation: `Series.dt.dayofweek`. | Replaced with `dt.day_of_week` (same values). |
+| Pandas deprecation: `DataFrame.join(lsuffix=, rsuffix=)` in R4. | Replaced with `a_g.add_suffix("_txn").join(f_g.add_suffix("_fee"), how="outer")`, which gives the same column names and works on all pandas versions. The validator now runs with no warnings. |
+| The weekend rule classed a row with an invalid date as "not applicable". | It is now applicable but unassessable. No change on this data (all dates are valid). |
+| The RI function turned a NaN key (typed load, e.g. Assignment 5) into the text `'nan'`, which was counted as an orphan. | NaN/None keys are now treated as blank and reported in `null_key_rate_pct`. No change on this text-loaded data. |
+| **Fee reconciliation inconsistency:** Part A (F015) reported 0 of 28,746 overlapping client-months agreeing, but Part D R4 (exact decimal) found 1: client 1810, 2023-12, $111.00 vs $111.01, exactly within $0.01. Part A summed floats, which turned the $0.01 difference into 0.0100000000000051. | `01_profile.py` now sums each client-month with exact decimals, and a client-month containing any invalid amount is unassessable. F015 now reports 28,745 failures of 28,746, with client 1810 as the example; no other line in the three Part A reports changed. I checked every other money tolerance test in `01_profile.py` (shares × price, fee formula, fee AUM vs snapshot AUM): float and exact decimal agree on all of them, so only this check needed the fix. |
+| `decision_log.md` Issue 13 said "none" of the 28,746 matched. | Evidence corrected to 1 match / 28,745 failures, with the Part D totals ($248,887,342.62 debits vs $46,632,368.54 billed). Added an explicit **Part D correction** row explaining the floating-point cause. The decision to keep both measures and never combine them is unchanged. |
+| `README_clean.md` limitation 11 said "None of the overlapping client-months match". | The generator in `02_clean.py` now says "Only 1 of the 28,746 … agrees within $0.01 (exact decimal); the other 28,745 do not". After the rerun, only `README_clean.md` changed: all 8 clean CSVs and 4 audit CSVs are byte-identical (SHA-256). |
+| README main finding said Advisory Fee transactions "never reconcile". | Corrected to 1 of 28,746. |
+
+**Consistency after the changes:** `03_validate.py` was rerun after all code changes. All 8 Part D reports, including the scorecard, are byte-identical to the pre-change baseline.
 
 ### Noted, not changed
 

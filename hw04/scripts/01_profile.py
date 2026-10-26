@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import re
 import sys
+from decimal import Decimal
 from itertools import combinations
 from pathlib import Path
 
@@ -940,19 +941,28 @@ def cross_table(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
         len(sn), len(s1), f"{sn['client_id'].nunique()} clients affected; could be fee waivers or missing billing. "
         "Do not create fee rows to fill this", examples_from(sn, ["client_id", "snapshot_date", "aum"]))
 
-    # Advisory Fee transactions vs fact_fees for the same client-month
-    af = tx[tx["txn_type"] == "Advisory Fee"]
-    af = af.assign(ym=af["txn_date"].str[:7], amt=to_num(af["amount"]))
-    af_m = af.groupby(["client_id", "ym"])["amt"].sum().rename("txn_fee")
-    ff = fe.assign(ym=fe["fee_date"].str[:7], amt=to_num(fe["amount"]))
-    ff = ff.groupby(["client_id", "ym"])["amt"].sum().rename("fee_table")
+    # Advisory Fee transactions vs fact_fees for the same client-month.
+    # Exact decimal sums: a float sum can turn a difference of exactly $0.01 into 0.0100000000000051
+    # and misjudge it. A client-month containing any invalid amount is unassessable, never compared.
+    def month_totals(df: pd.DataFrame, date_col: str) -> pd.Series:
+        g = df.assign(ym=df[date_col].str[:7]).groupby(["client_id", "ym"])["amount"]
+        return g.agg(lambda s: sum(map(Decimal, s), Decimal(0)) if s.str.match(RE_FLOAT).all() else None)
+
+    af_m = month_totals(tx[tx["txn_type"] == "Advisory Fee"], "txn_date").rename("txn_fee")
+    ff = month_totals(fe, "fee_date").rename("fee_table")
     k = pd.concat([af_m, ff], axis=1, join="inner")
-    match = (k["txn_fee"] - k["fee_table"]).abs() <= TOL_CURRENCY
+    assessable = k["txn_fee"].notna() & k["fee_table"].notna()
+    k = k[assessable]
+    match = pd.Series([abs(a - b) <= Decimal(str(TOL_CURRENCY)) for a, b in zip(k["txn_fee"], k["fee_table"])],
+                      index=k.index, dtype=bool)
     add("WARN", G, "fact_transactions", "Advisory Fee txns vs fact_fees (client-month totals)",
         "fee debits reconcile to billed fees", int((~match).sum()), len(k),
-        f"{len(af_m)} client-months with fee debits, {len(k)} also in fact_fees; median ratio txn/fee "
-        f"{(k['txn_fee'] / k['fee_table']).median():.2f}. If nothing reconciles, the two tables likely measure "
-        "different things; do not force them to agree")
+        f"{len(af_m)} client-months with fee debits, {int(assessable.size)} also in fact_fees, "
+        f"{int((~assessable).sum())} unassessable (invalid amount); {int(match.sum())} agree within "
+        f"${TOL_CURRENCY} (exact decimal); median ratio txn/fee "
+        f"{float(np.median([float(a / b) for a, b in zip(k['txn_fee'], k['fee_table'])])):.2f}. "
+        "Almost nothing reconciles, so the two tables likely measure different things; do not force them to agree",
+        examples_from(k[match].reset_index(), ["client_id", "ym", "txn_fee", "fee_table"]))
 
     # Gaps inside each client's monthly snapshot history
     sd = ps.assign(_d=to_date(ps["snapshot_date"])).dropna(subset=["_d"])

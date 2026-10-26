@@ -264,7 +264,8 @@ Under this order no quarantined row is edited before it is removed. Building the
 | Field | Entry |
 |---|---|
 | **Table / column** | fact_transactions (txn_type = Advisory Fee) vs fact_fees, by client-month |
-| **Evidence** | F015: there are 30,679 client-months with fee debits. 28,746 also have a fact_fees row, and **none** of those 28,746 match within ±$0.01. The median per-client-month ratio of transaction debits to billed fees is 3.11. A median ratio says nothing about aggregate totals, which were not compared. |
+| **Evidence** | F015: there are 30,679 client-months with fee debits. 28,746 also have a fact_fees row, and **only 1** of those 28,746 matches within ±$0.01 (client 1810, December 2023: $111.00 in transactions vs $111.01 billed); 28,745 do not. The median per-client-month ratio of transaction debits to billed fees is 3.11. Over the 28,746 overlapping client-months, transaction debits total $248,887,342.62 and billed fees total $46,632,368.54 (Part D R4; shown side by side, not combined). |
+| **Part D correction** | This entry first said **none** of the 28,746 matched. That came from a floating-point error in the Part A check: summed as floats, the difference of exactly $0.01 for client 1810 became 0.0100000000000051 and failed the ≤ $0.01 test. Part D's exact-decimal reconciliation (R4) found the 1 match. `01_profile.py` now sums with exact decimals, and F015 reports 28,745 failures out of 28,746. One agreeing client-month out of 28,746 does not change the conclusion: the two measures do not reconcile. **The decision is unchanged.** |
 | **Type** | Unexplained cross-table mismatch |
 | **Dimension violated** | Consistency |
 | **Decision** | **Leave both as is.** Do not adjust either table to match the other, and do not add or combine them in one measure until Wildcat explains how they relate. |
