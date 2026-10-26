@@ -1,0 +1,21 @@
+table,issue,action,rows_affected,note
+dim_client,Issue 5,quarantine,25,"probable duplicates: all columns except client_id/last_name equal, last_name a strict prefix variant, exactly one ID carries facts; fact-bearing ID kept with its spelling"
+fact_transactions,Issue 4,quarantine,200,"client_id not in dim_client; 200 distinct keys; 69 cash-type, 131 with security_id, 1 negative-share Buy; amount total 10888495.37"
+dim_client,Issue 6,standardize,77,full state name -> 2-letter code (format only; state correctness not verified)
+fact_transactions,Issue 2,standardize,197044,dropped '.0' from integer security IDs; blanks left blank
+fact_transactions,Issue 3,standardize,835,flipped sign of negative Buy shares that reconcile to amount (inferred convention)
+fact_portfolio_snapshot,Issue 1,convert,300,'x%' -> x/100 as decimal text; verified against benchmark_return_ytd and active_alpha_ytd
+dim_client,Issue 7,flag,75,added risk_profile_missing_flag; blanks not filled
+fact_portfolio_snapshot,Issue 8,flag,2440,"added return_outlier_flag: return_ytd or active_alpha_ytd outside assumed band (-0.6, 1.0); values unchanged, flag means investigate"
+fact_portfolio_snapshot,Issue 9,flag,420,"added aum_at_floor_flag (aum = 1,000.00); values unchanged"
+fact_fees,Issue 9,flag,386,"added aum_basis_at_floor_flag (aum_basis = 1,000.00); values unchanged"
+fact_transactions,Issue 10,flag,2410,"added after_last_snapshot_flag (inactive client, txn month > last snapshot month); values unchanged"
+fact_transactions,Issue 3,flag,835,shares_sign_corrected_flag added in Step 5; = 1 only on rows whose sign was changed
+fact_transactions,Issue 11,leave as is,0,txn_date left unchanged on non-trading days
+fact_portfolio_snapshot,Issue 12,leave as is,0,no fee rows created for snapshot months without fees
+fact_transactions,Issue 13,leave as is,0,Advisory Fee transactions and fact_fees left separate; do not combine
+fact_transactions,Issue 14,leave as is,0,Dividend shares/price/amount left unchanged
+several,Issue 15,leave as is,0,conditional blanks preserved
+dim_client,Issue 16,leave as is,0,ZIP codes kept as text with leading zeros
+dim_advisor,Issue 17,leave as is,0,literal 'None' certifications kept
+fact_portfolio_snapshot,Issue 18,leave as is,0,scientific-notation values left as written

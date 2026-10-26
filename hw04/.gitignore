@@ -5,3 +5,5 @@ __pycache__/
 
 # Root .gitignore ignores *.csv; the report CSVs are required deliverables
 !reports/*.csv
+!data/clean/*.csv
+!data/audit/*.csv

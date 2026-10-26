@@ -1,6 +1,6 @@
 # HW04 – Wildcat Capital data-quality audit
 
-Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Parts C–E are not started.
+Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Part C (`scripts/02_clean.py`) is reviewed; Parts D–E are not started.
 
 ## Structure
 
@@ -8,7 +8,10 @@ Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part
 hw04/
   decision_log.md            Part B decision log (instructions for 02_clean.py)
   data/raw/                  the eight source CSVs (read only, never modified)
+  data/clean/                Part C output: the 8 clean tables + README_clean.md
+  data/audit/                cleaning_log.csv, value_changes.csv, quarantine_*.csv
   scripts/01_profile.py      Part A audit / profiler
+  scripts/02_clean.py        Part C cleaning program (implements decision_log.md)
   scripts/verify_setup.py    stale copy of the pre-review profiler (see "Noted, not changed")
   reports/profile_raw.csv    per-column profile
   reports/dq_summary_raw.csv one row per check
@@ -21,7 +24,10 @@ From `hw04/`:
 
 ```
 .\.venv\Scripts\python.exe scripts\01_profile.py
+.\.venv\Scripts\python.exe scripts\02_clean.py
 ```
+
+`02_clean.py` stops with a named error, before writing anything, if any precondition or post-check fails.
 
 ## Part A: audit (`scripts/01_profile.py`)
 
@@ -111,6 +117,29 @@ Checked `decision_log.md` against Part B, `dq_summary_raw.csv`, `near_dup_client
 | The quarantined orphan amount was to be logged with no expected value. | Expected total added: 10,888,495.37. |
 | Issue 20 dimension "Accuracy" was not in the assignment's vocabulary. | Changed to "Accuracy/Plausibility". |
 | The coverage note did not say where the INFOs used in Issues 1–13 are cited. | It now lists them and states that F001–F056 are all cited. |
+
+### Round 4 – Part C cleaning program review
+
+Reviewed `scripts/02_clean.py` and its outputs against Part C and the committed `decision_log.md`. Everything below was checked independently by reading the written files back from disk, not by reusing the script's own checks.
+
+**Verified, no change needed**
+- **Order and decisions:** steps 1–8 run in the decision-log order (quarantine duplicates → orphans → state → security_id → Buy sign → `%` returns → flags → verify and write). Each repair matches its documented decision. Every step prints rows affected and before/after values, checks its preconditions with `require` and its after-state with `verify`. `verify` also works under `python -O`, unlike a bare `assert`.
+- **Raw unchanged:** the script only reads `data/raw`, and it re-reads raw from disk at the end and asserts equality. Rerunning `01_profile.py` on `data/raw` reproduces the committed `reports/*.csv` exactly (0 diff lines).
+- **Row counts:** raw = clean + quarantined for all 8 tables: dim_client 2,525 = 2,500 + 25; fact_transactions 298,772 = 298,572 + 200; the other six have 0 quarantined. Clean and quarantined key sets are disjoint, together equal the raw keys, and are unique.
+- **Quarantine:** both files keep the raw columns in raw order, and every original cell equals the raw text. Extra columns are only `qa_*`; `qa_retained_client_id` points at 25 distinct clean clients.
+- **Change log:** comparing every original cell in clean against raw by primary key gives 198,256 changed cells. These match `value_changes.csv` exactly as a multiset: 0 unlogged, 0 phantom, 0 no-op rows. By column: state 77, return_ytd 300, security_id 197,044, shares 835. In dim_client, only `state` changed.
+- **Flags:** all six recomputed independently from the clean data and match their documented meanings and sums: shares_sign_corrected 835 (equal to rows whose sign actually changed), risk_profile_missing 75, return_outlier 2,440, aum_at_floor 420, aum_basis_at_floor 386, after_last_snapshot 2,410.
+- **Repairs:** amount = shares × price holds on every traded clean row; all traded shares are positive; alpha reconciles on all snapshots; security_id, client_id and advisor_id text-match their parents 100%.
+- **README_clean.md:** has 13 relationships, a BI type for all 81 clean columns, the 6 flags, and 19 known limitations.
+- **Repeatable:** two consecutive runs produce byte-identical outputs (SHA-256 of all 13 files) and identical console output.
+
+**Changed**
+
+| Flagged | Change |
+|---|---|
+| NaN could pass silently, because NaN compares False. Step 5 found and post-checked negative shares with `as_float(shares) < 0`, so an unparseable value such as `(5)` would be neither fixed nor caught. Step 6's after-check counted `gap > tol`, so a blank or non-numeric benchmark or alpha would "reconcile". Step 7 gave an unparseable return or alpha a flag of 0. | Added `numeric()`, a stop rule requiring every relevant value to parse: shares and price on traded rows, all amounts, benchmark, alpha and non-`%` returns, converted returns, AUM and aum_basis. Added `n_outside_tol()`, which counts `not(gap <= tol)` so NaN is a failure. Step 5 also re-checks after the edit that shares are still numeric. Tested by injecting `(5)`, `n/a`, a blank and `abc` into copies of the data: each stops with a named `CleaningError`. On the real data, outputs are unchanged. |
+| The README_clean duplicate-client limitation said "every column except last_name". | Now says "except client_id and last_name (first_name equal)", matching the decision log. |
+| `hw04/.gitignore`: the root `*.csv` rule hid the Part C deliverables. | Added `!data/clean/*.csv` and `!data/audit/*.csv`. All 12 clean and audit CSVs are now visible to git; `data/raw/` and `.venv/` are still ignored. |
 
 ### Noted, not changed
 
