@@ -1,11 +1,12 @@
 # HW04 – Wildcat Capital data-quality audit
 
-Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Parts B–E are not started.
+Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Parts C–E are not started.
 
 ## Structure
 
 ```
 hw04/
+  decision_log.md            Part B decision log (instructions for 02_clean.py)
   data/raw/                  the eight source CSVs (read only, never modified)
   scripts/01_profile.py      Part A audit / profiler
   scripts/verify_setup.py    stale copy of the pre-review profiler (see "Noted, not changed")
@@ -79,6 +80,37 @@ No Wildcat data dictionary was supplied. These rules come from the data or from 
 | README lacked the "structure" section the submission checklist asks for, and did not mark the inferred rules as assumptions. | Added the Structure section and the Assumptions section. |
 
 Checked and met, no change: per-column profile metrics; the four check groups; ERROR/WARN/INFO tagging; all 13 relationships; text-only reads; both required report files.
+
+### Round 3 – Part B decision log review
+
+Checked `decision_log.md` against Part B, `dq_summary_raw.csv`, `near_dup_clients_raw.csv` and the raw files. The counts were recomputed independently from raw.
+
+**Verified, no change needed**
+- **Coverage:** all 7 ERRORs (F001–F007) and 9 WARNs (F008–F016) are covered by Issues 1–13. Every one of the 40 INFOs is cited. Every finding ID still points at the check it describes.
+- **Required fields:** all 22 entries have Table/column, Evidence, Dimension violated, Decision, Justification and Risk.
+- **Overlap counts:** all match the raw data, including:
+  - 200 orphan rows / 200 keys, by type Buy 58, Dividend 38, Sell 35, Deposit 25, Advisory Fee 24, Withdrawal 20
+  - 69 blank and 131 nonblank `security_id` among orphans; 1 negative-share orphan (txn 298603, `-411.3807`)
+  - clean counts: 197,044 security IDs, 835 negative Buys, 101,528 conditional blanks, 53,826 dividends, 77 full state names, 75 blank risk profiles, 228 leading-zero ZIPs
+  - weekend rows: 40,630 / 143,218 Buy/Sell and 44,316 / 155,354 cash events
+  - 2,410 after-last-snapshot transactions; flag bases of 420 and 386 rows at the 1,000.00 floor
+- **Order of operations:** the order is sound.
+  - Removing the 25 fact-less clients (step 1) does not change the 200 orphans (step 2).
+  - Step 1's equality checks run on raw values before step 3 changes state names. This matters because pair 2517/739 both hold `Florida`.
+  - Step 4 runs before the step 5 Buy reconciliation; Issue 1 runs before the Issue 8 flag.
+  - Quarantine files are built from raw by key, so no quarantined value is ever edited.
+
+**Changed**
+
+| Flagged | Change |
+|---|---|
+| The quarantine rule promised "byte-for-byte" columns, which pandas cannot guarantee: CSV quoting and line endings can change. | It now promises that every original cell value is preserved exactly as text (read with `dtype=str, keep_default_na=False`; no conversion, trimming or NA substitution), and asserts it per key. Issue 4's verification wording now matches. |
+| **Contradiction:** Issue 14 asserted "Dividend rows unchanged", but step 4 standardizes `security_id` on those same rows. | It now asserts that shares, price and amount on the 53,826 retained dividends equal their raw text. `security_id` may change only by the Issue 2 `.0` removal, and all other columns stay equal. |
+| Issue 5's "all non-name attributes equal" left open whether client_id and first_name were compared. | It now compares every column except client_id and last_name; first_name must be equal. last_name may differ only as a nonblank, case-sensitive strict prefix (truncated or extended). Evidence added: 25/25 pairs pass all three, and the partners 1267 (blank risk) and 739 (`Florida`) carry the same raw values. |
+| `return_outlier_flag` expected sum was "recomputed at run time", which the stop rule cannot assert. | Set to 2,440 (2,157 return + 2,217 alpha − 1,934 both), marked as a raw overlap count. |
+| The quarantined orphan amount was to be logged with no expected value. | Expected total added: 10,888,495.37. |
+| Issue 20 dimension "Accuracy" was not in the assignment's vocabulary. | Changed to "Accuracy/Plausibility". |
+| The coverage note did not say where the INFOs used in Issues 1–13 are cited. | It now lists them and states that F001–F056 are all cited. |
 
 ### Noted, not changed
 
