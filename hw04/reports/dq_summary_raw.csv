@@ -1,0 +1,288 @@
+finding_id,severity,check_group,table,column_or_relationship,check,affected_rows,denominator,pct_affected,examples,note
+F001,ERROR,1_column,fact_portfolio_snapshot,return_ytd,type validity (float),300,129547,0.232,"snapshot_id=42, return_ytd=9.28% | snapshot_id=59, return_ytd=19.52% | snapshot_id=879, return_ytd=13.35% | snapshot_id=1229, return_ytd=4.04% | snapshot_id=1354, return_ytd=-3.18%",expected float; denominator = nonblank values; 300 carry a '%' suffix
+F002,ERROR,1_column,fact_transactions,security_id,type validity (int),197175,197175,100.0,"txn_id=1, security_id=45.0 | txn_id=5, security_id=174.0 | txn_id=7, security_id=478.0 | txn_id=9, security_id=406.0 | txn_id=11, security_id=484.0",expected int; denominator = nonblank values; 197175 are integers written as floats (e.g. '45.0')
+F003,ERROR,1_column,fact_transactions,shares,"hard range [0.0001, None]",836,197175,0.424,"txn_id=272, shares=-261.9719 | txn_id=812, shares=-338.0946 | txn_id=815, shares=-360.8407 | txn_id=1989, shares=-237.4548 | txn_id=2371, shares=-374.4641","hard bound: direction is carried by txn_type, so share counts are positive; denominator = values that parsed as numbers"
+F004,ERROR,2_single_table,fact_transactions,amount,Buy: amount = shares x price,836,83556,1.001,"txn_id=272, txn_type=Buy, shares=-261.9719, price=441.71, amount=115715.61 | txn_id=812, txn_type=Buy, shares=-338.0946, price=397.85, amount=134510.94 | txn_id=815, txn_type=Buy, shares=-360.8407, price=243.46, amount=87850.28 | txn_id=1989, txn_type=Buy, shares=-237.4548, price=268.44, amount=63742.37 | txn_id=2371, txn_type=Buy, shares=-374.4641, price=30.65, amount=11477.32","tolerance +/- $0.01; of the failures, 836 reconcile if the sign of shares is ignored"
+F005,ERROR,2_single_table,fact_transactions,shares,negative shares,836,197175,0.424,"txn_id=272, txn_type=Buy, shares=-261.9719, amount=115715.61 | txn_id=812, txn_type=Buy, shares=-338.0946, amount=134510.94 | txn_id=815, txn_type=Buy, shares=-360.8407, amount=87850.28 | txn_id=1989, txn_type=Buy, shares=-237.4548, amount=63742.37 | txn_id=2371, txn_type=Buy, shares=-374.4641, amount=11477.32",by txn_type: 'Buy':836
+F006,ERROR,3_referential,fact_transactions,fact_transactions.client_id -> dim_client.client_id,orphan foreign key (no parent even after normalization),200,298772,0.067,"txn_id=298573, client_id=3191 | txn_id=298574, client_id=3017 | txn_id=298575, client_id=3058 | txn_id=298576, client_id=2974 | txn_id=298577, client_id=3131","200 distinct orphan keys; e.g. ['2702', '2704', '2708', '2714', '2715', '2716', '2717', '2720']"
+F007,ERROR,3_referential,fact_transactions,fact_transactions.security_id -> dim_security.security_id,key text does not match parent text (format mismatch),197175,197175,100.0,"txn_id=1, security_id=45.0 | txn_id=5, security_id=174.0 | txn_id=7, security_id=478.0 | txn_id=9, security_id=406.0 | txn_id=11, security_id=484.0",matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F008,WARN,1_column,dim_client,risk_profile,blank values,76,2525,3.01,"client_id=57, risk_profile= | client_id=94, risk_profile= | client_id=135, risk_profile= | client_id=179, risk_profile= | client_id=189, risk_profile=",blank with no structural reason found; investigate
+F009,WARN,1_column,dim_client,state,allowed values,78,2525,3.089,"client_id=109, state=Pennsylvania | client_id=153, state=Pennsylvania | client_id=172, state=New York | client_id=218, state=New Jersey | client_id=223, state=Pennsylvania","unexpected values: 'Pennsylvania':25; 'Florida':15; 'New York':14; 'New Jersey':13; 'California':5; 'Illinois':4; 'Texas':2; these look like full state names, i.e. mixed formats"
+F010,WARN,1_column,fact_portfolio_snapshot,return_ytd,"plausibility [-0.6, 1.0]",2157,129547,1.665,"snapshot_id=1455, return_ytd=-0.647622 | snapshot_id=1456, return_ytd=-0.631723 | snapshot_id=1462, return_ytd=-0.614962 | snapshot_id=1463, return_ytd=-0.97695 | snapshot_id=1464, return_ytd=-0.97695","assumption: assumed band for a YTD return; outside it is unusual, not impossible; '%' values scaled /100 for this test"
+F011,WARN,1_column,fact_portfolio_snapshot,active_alpha_ytd,"plausibility [-0.6, 1.0]",2217,129547,1.711,"snapshot_id=1454, active_alpha_ytd=-0.694911 | snapshot_id=1455, active_alpha_ytd=-0.769764 | snapshot_id=1456, active_alpha_ytd=-0.796465 | snapshot_id=1462, active_alpha_ytd=-0.6405 | snapshot_id=1463, active_alpha_ytd=-0.989232","assumption: assumed band for YTD alpha; outside it is unusual, not impossible"
+F012,WARN,2_single_table,dim_client,age+city+state+zip_code+initial_aum+client_since+advisor_id,near-duplicates (same age+city+state+zip_code+initial_aum+client_since+advisor_id),50,2525,1.98,99 'Terri Jacobson' ~ 2503 'Terri Jacobso' | 155 'Todd Cooper' ~ 2508 'Todd Coope' | 560 'Matthew Cervantes' ~ 2519 'Matthew Cervante' | 566 'Laura Frazier' ~ 2513 'Laura Frazie' | 674 'Karina Taylor' ~ 2501 'Karina Taylo',"25 groups, 25 pairs; per-column differences: last_name:truncated/extended=25"
+F013,WARN,2_single_table,fact_transactions,txn_date,Buy/Sell on non-trading day,40649,143311,28.364,"txn_id=26, txn_type=Buy, txn_date=2020-10-25 | txn_id=43, txn_type=Sell, txn_date=2022-01-02 | txn_id=51, txn_type=Buy, txn_date=2020-05-03 | txn_id=54, txn_type=Buy, txn_date=2022-02-20 | txn_id=66, txn_type=Buy, txn_date=2021-05-22",markets are closed on weekends
+F014,WARN,4_cross_table,fact_portfolio_snapshot,fact_portfolio_snapshot -> fact_fees,snapshot month has a fee row,7350,129547,5.674,"client_id=1, snapshot_date=2021-10-01, aum=4160730.0 | client_id=1, snapshot_date=2023-06-01, aum=3690339.76 | client_id=1, snapshot_date=2024-11-01, aum=4750984.58 | client_id=10, snapshot_date=2023-03-01, aum=3499887.87 | client_id=10, snapshot_date=2024-02-01, aum=4359471.47",2261 clients affected; could be fee waivers or missing billing. Do not create fee rows to fill this
+F015,WARN,4_cross_table,fact_transactions,Advisory Fee txns vs fact_fees (client-month totals),fee debits reconcile to billed fees,28746,28746,100.0,,"30679 client-months with fee debits, 28746 also in fact_fees; median ratio txn/fee 3.11. If nothing reconciles, the two tables likely measure different things; do not force them to agree"
+F016,WARN,4_cross_table,fact_transactions,txn_date vs last snapshot (inactive clients),transaction after an inactive client's last snapshot month,2410,21092,11.426,"txn_id=1278, client_id=13, txn_date=2023-09-08, last_snap=2023-03-01 | txn_id=1282, client_id=13, txn_date=2023-04-12, last_snap=2023-03-01 | txn_id=1285, client_id=13, txn_date=2023-11-16, last_snap=2023-03-01 | txn_id=1287, client_id=13, txn_date=2023-10-14, last_snap=2023-03-01 | txn_id=1288, client_id=13, txn_date=2023-04-25, last_snap=2023-03-01",
+F017,INFO,0_table,dim_advisor,(table),row and column count,25,25,100.0,,25 rows x 7 columns
+F018,INFO,0_table,dim_benchmark,(table),row and column count,8,8,100.0,,8 rows x 4 columns
+F019,INFO,0_table,dim_client,(table),row and column count,2525,2525,100.0,,"2,525 rows x 14 columns"
+F020,INFO,0_table,dim_date,(table),row and column count,1827,1827,100.0,,"1,827 rows x 12 columns"
+F021,INFO,0_table,dim_security,(table),row and column count,500,500,100.0,,500 rows x 8 columns
+F022,INFO,0_table,fact_fees,(table),row and column count,122197,122197,100.0,,"122,197 rows x 8 columns"
+F023,INFO,0_table,fact_portfolio_snapshot,(table),row and column count,129547,129547,100.0,,"129,547 rows x 13 columns"
+F024,INFO,0_table,fact_transactions,(table),row and column count,298772,298772,100.0,,"298,772 rows x 9 columns"
+F025,INFO,1_column,dim_advisor,certifications,literal null-like token,6,25,24.0,,tokens: 'None':6. Decide whether the word means 'missing' or is a real category (e.g. no certification)
+F026,INFO,1_column,dim_client,zip_code,leading zeros present,232,2525,9.188,,must stay text; numeric parsing would drop the zero and break the code
+F027,INFO,1_column,dim_security,sector,"blank by design when asset_class in ['Alternative', 'Cash Equivalent', 'Fixed Income']",219,500,43.8,,"legitimate structure: not applicable, not missing"
+F028,INFO,1_column,dim_security,expense_ratio_bps,blank by design when is_etf in ['False'],281,500,56.2,,"legitimate structure: not applicable, not missing"
+F029,INFO,1_column,fact_portfolio_snapshot,return_ytd,scientific-notation text,135,129547,0.104,"snapshot_id=1066, return_ytd=9.9e-05 | snapshot_id=1911, return_ytd=4.8e-05 | snapshot_id=2063, return_ytd=-7.6e-05 | snapshot_id=2755, return_ytd=-8e-05 | snapshot_id=2987, return_ytd=-4.3e-05","valid numbers, but a second text format; harmless once converted to float"
+F030,INFO,1_column,fact_portfolio_snapshot,active_alpha_ytd,scientific-notation text,756,129547,0.584,"snapshot_id=228, active_alpha_ytd=-1.9e-05 | snapshot_id=256, active_alpha_ytd=-2.2e-05 | snapshot_id=284, active_alpha_ytd=-6.9e-05 | snapshot_id=294, active_alpha_ytd=3.1e-05 | snapshot_id=340, active_alpha_ytd=4.2e-05","valid numbers, but a second text format; harmless once converted to float"
+F031,INFO,1_column,fact_transactions,security_id,"blank by design when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,298772,34.005,,"legitimate structure: not applicable, not missing"
+F032,INFO,1_column,fact_transactions,shares,"blank by design when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,298772,34.005,,"legitimate structure: not applicable, not missing"
+F033,INFO,1_column,fact_transactions,price,"blank by design when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,298772,34.005,,"legitimate structure: not applicable, not missing"
+F034,INFO,2_single_table,dim_date,is_trading_day,exchange holidays modeled?,0,1827,0.0,,"522 non-trading days vs 522 weekend days; equal, so market holidays are treated as trading days"
+F035,INFO,2_single_table,dim_date,date,calendar coverage,0,1827,0.0,,2020-01-01 to 2024-12-31
+F036,INFO,2_single_table,dim_security,name,near-duplicates (same name),6,500,1.2,38 'OLAB' ~ 62 'YXPS' | 317 'RONV' ~ 371 'YMS' | 388 'PPJV' ~ 395 'UFA',"3 groups, 3 pairs; per-column differences: ticker:other=3"
+F037,INFO,2_single_table,dim_security,name,same issuer name on different tickers,6,500,1.2,,"different tickers, so not necessarily duplicates"
+F038,INFO,2_single_table,fact_portfolio_snapshot,return_ytd,'%' rows: alpha reconciles if value / 100,300,300,100.0,"snapshot_id=42, return_ytd=9.28%, benchmark_return_ytd=0.08279, active_alpha_ytd=0.009966 | snapshot_id=59, return_ytd=19.52%, benchmark_return_ytd=0.184957, active_alpha_ytd=0.010246 | snapshot_id=879, return_ytd=13.35%, benchmark_return_ytd=0.054946, active_alpha_ytd=0.078543 | snapshot_id=1229, return_ytd=4.04%, benchmark_return_ytd=0.044301, active_alpha_ytd=-0.003947 | snapshot_id=1354, return_ytd=-3.18%, benchmark_return_ytd=-0.0263, active_alpha_ytd=-0.0055",reconciles without /100: 0. Evidence for how to convert the '%' text
+F039,INFO,2_single_table,fact_portfolio_snapshot,aum,"rows sitting exactly at minimum AUM (1,000.00)",420,129547,0.324,"snapshot_id=1463, client_id=29, snapshot_date=2021-02-01, aum=1000.0 | snapshot_id=1464, client_id=29, snapshot_date=2021-03-01, aum=1000.0 | snapshot_id=1727, client_id=33, snapshot_date=2023-02-01, aum=1000.0 | snapshot_id=1728, client_id=33, snapshot_date=2023-03-01, aum=1000.0 | snapshot_id=1729, client_id=33, snapshot_date=2023-04-01, aum=1000.0","a repeated exact minimum can mean a system floor, not a real balance"
+F040,INFO,2_single_table,fact_transactions,shares,Dividend shares compared with net shares held (exploratory),172,23751,0.724,"txn_id=1, client_id=1, security_id=45.0, txn_date=2023-12-16, shares=455.1138, held_before=17.5342 | txn_id=7, client_id=1, security_id=478.0, txn_date=2021-05-27, shares=315.4236, held_before=405.7139 | txn_id=13, client_id=1, security_id=484.0, txn_date=2023-04-25, shares=472.0851, held_before=337.6649 | txn_id=19, client_id=1, security_id=139.0, txn_date=2021-07-05, shares=30.9847, held_before=687.1357 | txn_id=27, client_id=1, security_id=424.0, txn_date=2024-01-28, shares=316.7838, held_before=751.0912","amount = shares x price on 53864 of 53864 dividends, so the fields are internally consistent, but that does not show the dividend equals the whole position: shares may be newly reinvested shares at the reinvestment price. Exploratory: of 23751 dividends with a positive net position from earlier in-extract Buys/Sells, 172 have shares within 1% of it (median shares/held 0.68); 30113 have no earlier Buy in the extract. Holdings are only partly reconstructable (no opening positions, transfers, reinvestment lots or corporate actions), so this neither confirms nor rules out either reading. Meaning of Dividend shares is unresolved; do not recompute amounts"
+F041,INFO,2_single_table,fact_transactions,txn_date,Advisory Fee/Deposit/Dividend/Withdrawal on non-trading day,44350,155461,28.528,"txn_id=1, txn_type=Dividend, txn_date=2023-12-16 | txn_id=6, txn_type=Withdrawal, txn_date=2022-11-05 | txn_id=8, txn_type=Withdrawal, txn_date=2023-10-07 | txn_id=20, txn_type=Advisory Fee, txn_date=2024-03-16 | txn_id=22, txn_type=Withdrawal, txn_date=2021-02-21",cash events can post on weekends; context only
+F042,INFO,3_referential,dim_benchmark,dim_security.benchmark_id -> dim_benchmark.benchmark_id,parent keys never referenced by this child,2,8,25.0,,"e.g. ['6', '8']"
+F043,INFO,3_referential,dim_benchmark,fact_portfolio_snapshot.benchmark_id -> dim_benchmark.benchmark_id,parent keys never referenced by this child,5,8,62.5,,"e.g. ['2', '4', '5', '6', '7']"
+F044,INFO,3_referential,dim_client,fact_fees.client_id -> dim_client.client_id,parent keys never referenced by this child,25,2525,0.99,,"e.g. ['2501', '2502', '2503', '2504', '2505', '2506', '2507', '2508']"
+F045,INFO,3_referential,dim_client,fact_portfolio_snapshot.client_id -> dim_client.client_id,parent keys never referenced by this child,25,2525,0.99,,"e.g. ['2501', '2502', '2503', '2504', '2505', '2506', '2507', '2508']"
+F046,INFO,3_referential,dim_client,fact_transactions.client_id -> dim_client.client_id,parent keys never referenced by this child,25,2525,0.99,,"e.g. ['2501', '2502', '2503', '2504', '2505', '2506', '2507', '2508']"
+F047,INFO,3_referential,dim_date,fact_fees.fee_date -> dim_date.date,parent keys never referenced by this child,1767,1827,96.716,,"e.g. ['2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05', '2020-01-06', '2020-01-07', '2020-01-08', '2020-01-09']"
+F048,INFO,3_referential,dim_date,fact_portfolio_snapshot.snapshot_date -> dim_date.date,parent keys never referenced by this child,1767,1827,96.716,,"e.g. ['2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05', '2020-01-06', '2020-01-07', '2020-01-08', '2020-01-09']"
+F049,INFO,3_referential,dim_date,fact_transactions.txn_date -> dim_date.date,parent keys never referenced by this child,1,1827,0.055,,e.g. ['2024-12-31']
+F050,INFO,3_referential,fact_transactions,fact_transactions.security_id -> dim_security.security_id,blank foreign key,101597,298772,34.005,,blank FKs are excluded from the match-rate denominator; judge whether blank is allowed (see conditional-blank checks)
+F051,INFO,4_cross_table,dim_client,dim_client vs all facts,"client has no fees, snapshots or transactions",25,2525,0.99,"client_id=2501, first_name=Karina, last_name=Taylo | client_id=2502, first_name=Darren, last_name=Marti | client_id=2503, first_name=Terri, last_name=Jacobso | client_id=2504, first_name=Andrea, last_name=Collin | client_id=2505, first_name=Jennifer, last_name=Taylo",
+F052,INFO,4_cross_table,dim_client,near-duplicate clients vs facts,near-duplicate client ids that carry facts,25,50,50.0,"near_dup_group=1, client_id=99, last_name=Jacobson, n_fees=60, n_snapshots=60, n_transactions=65 | near_dup_group=1, client_id=2503, last_name=Jacobso, n_fees=0, n_snapshots=0, n_transactions=0 | near_dup_group=2, client_id=155, last_name=Cooper, n_fees=59, n_snapshots=60, n_transactions=149 | near_dup_group=2, client_id=2508, last_name=Coope, n_fees=0, n_snapshots=0, n_transactions=0 | near_dup_group=3, client_id=560, last_name=Cervantes, n_fees=42, n_snapshots=45, n_transactions=97 | near_dup_group=3, client_id=2519, last_name=Cervante, n_fees=0, n_snapshots=0, n_transactions=0 | near_dup_group=4, client_id=566, last_name=Frazier, n_fees=58, n_snapshots=60, n_transactions=133 | near_dup_group=4, client_id=2513, last_name=Frazie, n_fees=0, n_snapshots=0, n_transactions=0 | near_dup_group=5, client_id=674, last_name=Taylor, n_fees=56, n_snapshots=60, n_transactions=105 | near_dup_group=5, client_id=2501, last_name=Taylo, n_fees=0, n_snapshots=0, n_transactions=0","25 groups: 25 with exactly one id carrying facts, 0 with none, 0 with several. 0 ids sit in a group whose non-matched attributes differ. Per-client evidence in reports/near_dup_clients_raw.csv; evidence only, no quarantine decision here"
+F053,INFO,4_cross_table,fact_fees,fact_fees.fee_date vs dim_client.client_since,dated before client_since but in the same month,858,122197,0.702,,"monthly rows are stamped on the 1st, so a mid-month start legitimately precedes its first row"
+F054,INFO,4_cross_table,fact_portfolio_snapshot,fact_portfolio_snapshot.snapshot_date vs dim_client.client_since,dated before client_since but in the same month,930,129547,0.718,,"monthly rows are stamped on the 1st, so a mid-month start legitimately precedes its first row"
+F055,INFO,4_cross_table,fact_portfolio_snapshot,benchmark_id vs dim_client.risk_profile,benchmark used per risk profile (blank = ''),0,129547,0.0,,"''->{'3': 3942}; 'Aggressive'->{'1': 12505}; 'Balanced'->{'3': 38960}; 'Conservative'->{'8': 24247}; 'Moderately Aggressive'->{'1': 24023}; 'Moderately Conservative'->{'8': 25870}. Each profile maps to one benchmark. Blank-profile clients' benchmark is evidence about their likely profile, not proof"
+F056,INFO,4_cross_table,fact_transactions,Dividend vs dim_security.asset_class,dividends by asset class,0,53864,0.0,,'Equity':30283; 'Fixed Income':12813; 'Alternative':6155; 'Cash Equivalent':4613
+F057,PASS,1_column,dim_advisor,advisor_id,type validity (int),0,25,0.0,,
+F058,PASS,1_column,dim_advisor,first_name,type validity (str),0,25,0.0,,
+F059,PASS,1_column,dim_advisor,last_name,type validity (str),0,25,0.0,,
+F060,PASS,1_column,dim_advisor,region,type validity (str),0,25,0.0,,
+F061,PASS,1_column,dim_advisor,years_experience,type validity (int),0,25,0.0,,
+F062,PASS,1_column,dim_advisor,aum_target_mm,type validity (int),0,25,0.0,,
+F063,PASS,1_column,dim_advisor,certifications,type validity (str),0,25,0.0,,
+F064,PASS,1_column,dim_advisor,advisor_id,primary key unique,0,25,0.0,,
+F065,PASS,1_column,dim_advisor,advisor_id,primary key not blank,0,25,0.0,,
+F066,PASS,1_column,dim_advisor,region,allowed values,0,25,0.0,,
+F067,PASS,1_column,dim_advisor,years_experience,"hard range [0, None]",0,25,0.0,,hard bound: experience cannot be negative; denominator = values that parsed as numbers
+F068,PASS,1_column,dim_advisor,aum_target_mm,"hard range [0.01, None]",0,25,0.0,,hard bound: a target must be positive; denominator = values that parsed as numbers
+F069,PASS,1_column,dim_advisor,years_experience,"plausibility [None, 50]",0,25,0.0,,"assumption: careers rarely exceed 50 years; outside it is unusual, not impossible"
+F070,PASS,1_column,dim_advisor,aum_target_mm,"plausibility [1, 10000]",0,25,0.0,,"assumption: assumed $1M-$10B book size; outside it is unusual, not impossible"
+F071,PASS,1_column,dim_benchmark,benchmark_id,type validity (int),0,8,0.0,,
+F072,PASS,1_column,dim_benchmark,name,type validity (str),0,8,0.0,,
+F073,PASS,1_column,dim_benchmark,asset_class,type validity (str),0,8,0.0,,
+F074,PASS,1_column,dim_benchmark,ticker_proxy,type validity (str),0,8,0.0,,
+F075,PASS,1_column,dim_benchmark,benchmark_id,primary key unique,0,8,0.0,,
+F076,PASS,1_column,dim_benchmark,benchmark_id,primary key not blank,0,8,0.0,,
+F077,PASS,1_column,dim_benchmark,ticker_proxy,business key unique,0,8,0.0,,
+F078,PASS,1_column,dim_benchmark,name,business key unique,0,8,0.0,,
+F079,PASS,1_column,dim_client,client_id,type validity (int),0,2525,0.0,,
+F080,PASS,1_column,dim_client,first_name,type validity (str),0,2525,0.0,,
+F081,PASS,1_column,dim_client,last_name,type validity (str),0,2525,0.0,,
+F082,PASS,1_column,dim_client,age,type validity (int),0,2525,0.0,,
+F083,PASS,1_column,dim_client,city,type validity (str),0,2525,0.0,,
+F084,PASS,1_column,dim_client,state,type validity (str),0,2525,0.0,,
+F085,PASS,1_column,dim_client,zip_code,type validity (str),0,2525,0.0,,
+F086,PASS,1_column,dim_client,risk_profile,type validity (str),0,2449,0.0,,
+F087,PASS,1_column,dim_client,client_tier,type validity (str),0,2525,0.0,,
+F088,PASS,1_column,dim_client,primary_account_type,type validity (str),0,2525,0.0,,
+F089,PASS,1_column,dim_client,initial_aum,type validity (float),0,2525,0.0,,
+F090,PASS,1_column,dim_client,client_since,type validity (date),0,2525,0.0,,
+F091,PASS,1_column,dim_client,advisor_id,type validity (int),0,2525,0.0,,
+F092,PASS,1_column,dim_client,is_active,type validity (bool),0,2525,0.0,,
+F093,PASS,1_column,dim_client,client_id,primary key unique,0,2525,0.0,,
+F094,PASS,1_column,dim_client,client_id,primary key not blank,0,2525,0.0,,
+F095,PASS,1_column,dim_client,risk_profile,allowed values,0,2449,0.0,,
+F096,PASS,1_column,dim_client,client_tier,allowed values,0,2525,0.0,,
+F097,PASS,1_column,dim_client,primary_account_type,allowed values,0,2525,0.0,,
+F098,PASS,1_column,dim_client,age,"hard range [0, None]",0,2525,0.0,,hard bound: age cannot be negative; denominator = values that parsed as numbers
+F099,PASS,1_column,dim_client,initial_aum,"hard range [0.01, None]",0,2525,0.0,,hard bound: an opening balance must be positive; denominator = values that parsed as numbers
+F100,PASS,1_column,dim_client,age,"plausibility [18, 110]",0,2525,0.0,,"assumption: assumes adult account holders; custodial/529 owners could be minors; outside it is unusual, not impossible"
+F101,PASS,1_column,dim_client,client_since,"date range [None, 2024-12-31]",0,2525,0.0,,hard bound: cannot be later than the extract end 2024-12-31
+F102,PASS,1_column,dim_client,client_since,"plausibility date [1950-01-01, None]",0,2525,0.0,,"assumption: earlier dates are unusual, not impossible"
+F103,PASS,1_column,dim_client,zip_code,pattern ^\d{5}(-\d{4})?$,0,2525,0.0,,
+F104,PASS,1_column,dim_date,date_id,type validity (int),0,1827,0.0,,
+F105,PASS,1_column,dim_date,date,type validity (date),0,1827,0.0,,
+F106,PASS,1_column,dim_date,year,type validity (int),0,1827,0.0,,
+F107,PASS,1_column,dim_date,quarter,type validity (int),0,1827,0.0,,
+F108,PASS,1_column,dim_date,month,type validity (int),0,1827,0.0,,
+F109,PASS,1_column,dim_date,month_name,type validity (str),0,1827,0.0,,
+F110,PASS,1_column,dim_date,week_of_year,type validity (int),0,1827,0.0,,
+F111,PASS,1_column,dim_date,day_of_week,type validity (str),0,1827,0.0,,
+F112,PASS,1_column,dim_date,is_month_end,type validity (int),0,1827,0.0,,
+F113,PASS,1_column,dim_date,is_quarter_end,type validity (int),0,1827,0.0,,
+F114,PASS,1_column,dim_date,is_year_end,type validity (int),0,1827,0.0,,
+F115,PASS,1_column,dim_date,is_trading_day,type validity (int),0,1827,0.0,,
+F116,PASS,1_column,dim_date,date_id,primary key unique,0,1827,0.0,,
+F117,PASS,1_column,dim_date,date_id,primary key not blank,0,1827,0.0,,
+F118,PASS,1_column,dim_date,date,business key unique,0,1827,0.0,,
+F119,PASS,1_column,dim_date,is_month_end,allowed values,0,1827,0.0,,
+F120,PASS,1_column,dim_date,is_quarter_end,allowed values,0,1827,0.0,,
+F121,PASS,1_column,dim_date,is_year_end,allowed values,0,1827,0.0,,
+F122,PASS,1_column,dim_date,is_trading_day,allowed values,0,1827,0.0,,
+F123,PASS,1_column,dim_date,day_of_week,allowed values,0,1827,0.0,,
+F124,PASS,1_column,dim_date,quarter,"hard range [1, 4]",0,1827,0.0,,hard bound: calendar definition; denominator = values that parsed as numbers
+F125,PASS,1_column,dim_date,month,"hard range [1, 12]",0,1827,0.0,,hard bound: calendar definition; denominator = values that parsed as numbers
+F126,PASS,1_column,dim_date,week_of_year,"hard range [1, 53]",0,1827,0.0,,hard bound: ISO calendar definition; denominator = values that parsed as numbers
+F127,PASS,1_column,dim_security,security_id,type validity (int),0,500,0.0,,
+F128,PASS,1_column,dim_security,ticker,type validity (str),0,500,0.0,,
+F129,PASS,1_column,dim_security,name,type validity (str),0,500,0.0,,
+F130,PASS,1_column,dim_security,asset_class,type validity (str),0,500,0.0,,
+F131,PASS,1_column,dim_security,sector,type validity (str),0,281,0.0,,
+F132,PASS,1_column,dim_security,benchmark_id,type validity (int),0,500,0.0,,
+F133,PASS,1_column,dim_security,is_etf,type validity (bool),0,500,0.0,,
+F134,PASS,1_column,dim_security,expense_ratio_bps,type validity (float),0,219,0.0,,
+F135,PASS,1_column,dim_security,security_id,primary key unique,0,500,0.0,,
+F136,PASS,1_column,dim_security,security_id,primary key not blank,0,500,0.0,,
+F137,PASS,1_column,dim_security,ticker,business key unique,0,500,0.0,,
+F138,PASS,1_column,dim_security,asset_class,allowed values,0,500,0.0,,
+F139,PASS,1_column,dim_security,expense_ratio_bps,"hard range [0, None]",0,219,0.0,,hard bound: a fee rate cannot be negative; denominator = values that parsed as numbers
+F140,PASS,1_column,dim_security,expense_ratio_bps,"plausibility [None, 300]",0,219,0.0,,"assumption: assumed ceiling; few funds charge over 3%; outside it is unusual, not impossible"
+F141,PASS,1_column,dim_security,sector,blank where asset_class requires a value,0,281,0.0,,
+F142,PASS,1_column,dim_security,sector,value present where asset_class implies not applicable,0,219,0.0,,
+F143,PASS,1_column,dim_security,expense_ratio_bps,blank where is_etf requires a value,0,219,0.0,,
+F144,PASS,1_column,dim_security,expense_ratio_bps,value present where is_etf implies not applicable,0,281,0.0,,
+F145,PASS,1_column,fact_fees,fee_id,type validity (int),0,122197,0.0,,
+F146,PASS,1_column,fact_fees,client_id,type validity (int),0,122197,0.0,,
+F147,PASS,1_column,fact_fees,advisor_id,type validity (int),0,122197,0.0,,
+F148,PASS,1_column,fact_fees,fee_date,type validity (date),0,122197,0.0,,
+F149,PASS,1_column,fact_fees,fee_type,type validity (str),0,122197,0.0,,
+F150,PASS,1_column,fact_fees,aum_basis,type validity (float),0,122197,0.0,,
+F151,PASS,1_column,fact_fees,bps_charged,type validity (float),0,122197,0.0,,
+F152,PASS,1_column,fact_fees,amount,type validity (float),0,122197,0.0,,
+F153,PASS,1_column,fact_fees,fee_id,primary key unique,0,122197,0.0,,
+F154,PASS,1_column,fact_fees,fee_id,primary key not blank,0,122197,0.0,,
+F155,PASS,1_column,fact_fees,client_id+fee_date,business key unique,0,122197,0.0,,
+F156,PASS,1_column,fact_fees,fee_type,allowed values,0,122197,0.0,,
+F157,PASS,1_column,fact_fees,aum_basis,"hard range [0.01, None]",0,122197,0.0,,hard bound: a fee basis must be positive; denominator = values that parsed as numbers
+F158,PASS,1_column,fact_fees,bps_charged,"hard range [0, None]",0,122197,0.0,,hard bound: a fee rate cannot be negative; denominator = values that parsed as numbers
+F159,PASS,1_column,fact_fees,amount,"hard range [0.01, None]",0,122197,0.0,,hard bound: a billed fee must be positive; denominator = values that parsed as numbers
+F160,PASS,1_column,fact_fees,bps_charged,"plausibility [None, 300]",0,122197,0.0,,"assumption: assumed ceiling; advisory fees above 3% are unusual; outside it is unusual, not impossible"
+F161,PASS,1_column,fact_fees,fee_date,"date range [2020-01-01, 2024-12-31]",0,122197,0.0,,hard bound: the extract covers 2020-01-01 to 2024-12-31
+F162,PASS,1_column,fact_portfolio_snapshot,snapshot_id,type validity (int),0,129547,0.0,,
+F163,PASS,1_column,fact_portfolio_snapshot,client_id,type validity (int),0,129547,0.0,,
+F164,PASS,1_column,fact_portfolio_snapshot,advisor_id,type validity (int),0,129547,0.0,,
+F165,PASS,1_column,fact_portfolio_snapshot,benchmark_id,type validity (int),0,129547,0.0,,
+F166,PASS,1_column,fact_portfolio_snapshot,snapshot_date,type validity (date),0,129547,0.0,,
+F167,PASS,1_column,fact_portfolio_snapshot,year,type validity (int),0,129547,0.0,,
+F168,PASS,1_column,fact_portfolio_snapshot,month,type validity (int),0,129547,0.0,,
+F169,PASS,1_column,fact_portfolio_snapshot,aum,type validity (float),0,129547,0.0,,
+F170,PASS,1_column,fact_portfolio_snapshot,benchmark_return_ytd,type validity (float),0,129547,0.0,,
+F171,PASS,1_column,fact_portfolio_snapshot,active_alpha_ytd,type validity (float),0,129547,0.0,,
+F172,PASS,1_column,fact_portfolio_snapshot,cash_pct,type validity (float),0,129547,0.0,,
+F173,PASS,1_column,fact_portfolio_snapshot,account_type,type validity (str),0,129547,0.0,,
+F174,PASS,1_column,fact_portfolio_snapshot,snapshot_id,primary key unique,0,129547,0.0,,
+F175,PASS,1_column,fact_portfolio_snapshot,snapshot_id,primary key not blank,0,129547,0.0,,
+F176,PASS,1_column,fact_portfolio_snapshot,client_id+snapshot_date,business key unique,0,129547,0.0,,
+F177,PASS,1_column,fact_portfolio_snapshot,account_type,allowed values,0,129547,0.0,,
+F178,PASS,1_column,fact_portfolio_snapshot,aum,"hard range [0.01, None]",0,129547,0.0,,hard bound: a balance must be positive; denominator = values that parsed as numbers
+F179,PASS,1_column,fact_portfolio_snapshot,cash_pct,"hard range [0, 1]",0,129547,0.0,,hard bound: a fraction; denominator = values that parsed as numbers
+F180,PASS,1_column,fact_portfolio_snapshot,month,"hard range [1, 12]",0,129547,0.0,,hard bound: calendar definition; denominator = values that parsed as numbers
+F181,PASS,1_column,fact_portfolio_snapshot,return_ytd,"hard range [-1, None]",0,129247,0.0,,hard bound: a long-only portfolio cannot lose more than 100%; denominator = values that parsed as numbers
+F182,PASS,1_column,fact_portfolio_snapshot,benchmark_return_ytd,"hard range [-1, None]",0,129547,0.0,,hard bound: an index cannot lose more than 100%; denominator = values that parsed as numbers
+F183,PASS,1_column,fact_portfolio_snapshot,snapshot_date,"date range [2020-01-01, 2024-12-31]",0,129547,0.0,,hard bound: the extract covers 2020-01-01 to 2024-12-31
+F184,PASS,1_column,fact_transactions,txn_id,type validity (int),0,298772,0.0,,
+F185,PASS,1_column,fact_transactions,client_id,type validity (int),0,298772,0.0,,
+F186,PASS,1_column,fact_transactions,advisor_id,type validity (int),0,298772,0.0,,
+F187,PASS,1_column,fact_transactions,txn_date,type validity (date),0,298772,0.0,,
+F188,PASS,1_column,fact_transactions,txn_type,type validity (str),0,298772,0.0,,
+F189,PASS,1_column,fact_transactions,shares,type validity (float),0,197175,0.0,,
+F190,PASS,1_column,fact_transactions,price,type validity (float),0,197175,0.0,,
+F191,PASS,1_column,fact_transactions,amount,type validity (float),0,298772,0.0,,
+F192,PASS,1_column,fact_transactions,txn_id,primary key unique,0,298772,0.0,,
+F193,PASS,1_column,fact_transactions,txn_id,primary key not blank,0,298772,0.0,,
+F194,PASS,1_column,fact_transactions,txn_type,allowed values,0,298772,0.0,,
+F195,PASS,1_column,fact_transactions,price,"hard range [0.01, None]",0,197175,0.0,,hard bound: a traded price must be positive; denominator = values that parsed as numbers
+F196,PASS,1_column,fact_transactions,amount,"hard range [0.01, None]",0,298772,0.0,,"hard bound: direction is carried by txn_type, so amounts are positive; denominator = values that parsed as numbers"
+F197,PASS,1_column,fact_transactions,txn_date,"date range [2020-01-01, 2024-12-31]",0,298772,0.0,,hard bound: the extract covers 2020-01-01 to 2024-12-31
+F198,PASS,1_column,fact_transactions,security_id,blank where txn_type requires a value,0,197175,0.0,,
+F199,PASS,1_column,fact_transactions,security_id,value present where txn_type implies not applicable,0,101597,0.0,,
+F200,PASS,1_column,fact_transactions,shares,blank where txn_type requires a value,0,197175,0.0,,
+F201,PASS,1_column,fact_transactions,shares,value present where txn_type implies not applicable,0,101597,0.0,,
+F202,PASS,1_column,fact_transactions,price,blank where txn_type requires a value,0,197175,0.0,,
+F203,PASS,1_column,fact_transactions,price,value present where txn_type implies not applicable,0,101597,0.0,,
+F204,PASS,2_single_table,dim_advisor,(all columns),exact duplicate rows,0,25,0.0,,
+F205,PASS,2_single_table,dim_advisor,(all except PK),duplicate rows ignoring primary key,0,25,0.0,,
+F206,PASS,2_single_table,dim_benchmark,(all columns),exact duplicate rows,0,8,0.0,,
+F207,PASS,2_single_table,dim_benchmark,(all except PK),duplicate rows ignoring primary key,0,8,0.0,,
+F208,PASS,2_single_table,dim_client,(all columns),exact duplicate rows,0,2525,0.0,,
+F209,PASS,2_single_table,dim_client,(all except PK),duplicate rows ignoring primary key,0,2525,0.0,,
+F210,PASS,2_single_table,dim_client,client_tier+initial_aum,"tier consistent with initial AUM (<500k Retail, 500k-5M HNW, >=5M UHNW)",0,2525,0.0,,bands are an assumption; adjust if Wildcat publishes its own
+F211,PASS,2_single_table,dim_date,(all columns),exact duplicate rows,0,1827,0.0,,
+F212,PASS,2_single_table,dim_date,(all except PK),duplicate rows ignoring primary key,0,1827,0.0,,
+F213,PASS,2_single_table,dim_date,year,year agrees with date,0,1827,0.0,,
+F214,PASS,2_single_table,dim_date,quarter,quarter agrees with date,0,1827,0.0,,
+F215,PASS,2_single_table,dim_date,month,month agrees with date,0,1827,0.0,,
+F216,PASS,2_single_table,dim_date,month_name,month_name agrees with date,0,1827,0.0,,
+F217,PASS,2_single_table,dim_date,day_of_week,day_of_week agrees with date,0,1827,0.0,,
+F218,PASS,2_single_table,dim_date,week_of_year,week_of_year agrees with date,0,1827,0.0,,week_of_year tested as ISO week
+F219,PASS,2_single_table,dim_date,is_month_end,is_month_end agrees with date,0,1827,0.0,,
+F220,PASS,2_single_table,dim_date,is_quarter_end,is_quarter_end agrees with date,0,1827,0.0,,
+F221,PASS,2_single_table,dim_date,is_year_end,is_year_end agrees with date,0,1827,0.0,,
+F222,PASS,2_single_table,dim_date,is_trading_day,trading day = weekday,0,1827,0.0,,differences would be market holidays
+F223,PASS,2_single_table,dim_date,date,calendar has no gaps,0,1826,0.0,,
+F224,PASS,2_single_table,dim_date,date,lookup key unique (duplicates: first row kept for this check),0,1827,0.0,,
+F225,PASS,2_single_table,dim_security,(all columns),exact duplicate rows,0,500,0.0,,
+F226,PASS,2_single_table,dim_security,(all except PK),duplicate rows ignoring primary key,0,500,0.0,,
+F227,PASS,2_single_table,dim_security,asset_class+is_etf,equity rows flagged as ETF,0,500,0.0,,
+F228,PASS,2_single_table,fact_fees,(all columns),exact duplicate rows,0,122197,0.0,,
+F229,PASS,2_single_table,fact_fees,(all except PK),duplicate rows ignoring primary key,0,122197,0.0,,
+F230,PASS,2_single_table,fact_fees,amount,amount = aum_basis x bps / 10000 / 12,0,122197,0.0,,tolerance +/- $0.01; max abs diff 0.0050
+F231,PASS,2_single_table,fact_fees,fee_date,monthly fee dated on the 1st,0,122197,0.0,,
+F232,PASS,2_single_table,fact_portfolio_snapshot,(all columns),exact duplicate rows,0,129547,0.0,,
+F233,PASS,2_single_table,fact_portfolio_snapshot,(all except PK),duplicate rows ignoring primary key,0,129547,0.0,,
+F234,PASS,2_single_table,fact_portfolio_snapshot,year+month,year/month agree with snapshot_date,0,129547,0.0,,
+F235,PASS,2_single_table,fact_portfolio_snapshot,snapshot_date,monthly snapshot dated on the 1st,0,129547,0.0,,
+F236,PASS,2_single_table,fact_portfolio_snapshot,active_alpha_ytd,alpha = return_ytd - benchmark_return_ytd (decimal rows),0,129247,0.0,,tolerance 0.0001
+F237,PASS,2_single_table,fact_transactions,(all columns),exact duplicate rows,0,298772,0.0,,
+F238,PASS,2_single_table,fact_transactions,(all except PK),duplicate rows ignoring primary key,0,298772,0.0,,
+F239,PASS,2_single_table,fact_transactions,amount,Dividend: amount = shares x price,0,53864,0.0,,"tolerance +/- $0.01; of the failures, 0 reconcile if the sign of shares is ignored"
+F240,PASS,2_single_table,fact_transactions,amount,Sell: amount = shares x price,0,59755,0.0,,"tolerance +/- $0.01; of the failures, 0 reconcile if the sign of shares is ignored"
+F241,PASS,3_referential,dim_advisor,dim_client.advisor_id -> dim_advisor.advisor_id,parent keys never referenced by this child,0,25,0.0,,
+F242,PASS,3_referential,dim_advisor,fact_fees.advisor_id -> dim_advisor.advisor_id,parent keys never referenced by this child,0,25,0.0,,
+F243,PASS,3_referential,dim_advisor,fact_portfolio_snapshot.advisor_id -> dim_advisor.advisor_id,parent keys never referenced by this child,0,25,0.0,,
+F244,PASS,3_referential,dim_advisor,fact_transactions.advisor_id -> dim_advisor.advisor_id,parent keys never referenced by this child,0,25,0.0,,
+F245,PASS,3_referential,dim_client,dim_client.advisor_id -> dim_advisor.advisor_id,key text does not match parent text (format mismatch),0,2525,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F246,PASS,3_referential,dim_client,dim_client.advisor_id -> dim_advisor.advisor_id,orphan foreign key (no parent even after normalization),0,2525,0.0,,
+F247,PASS,3_referential,dim_security,dim_security.benchmark_id -> dim_benchmark.benchmark_id,key text does not match parent text (format mismatch),0,500,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F248,PASS,3_referential,dim_security,dim_security.benchmark_id -> dim_benchmark.benchmark_id,orphan foreign key (no parent even after normalization),0,500,0.0,,
+F249,PASS,3_referential,dim_security,fact_transactions.security_id -> dim_security.security_id,parent keys never referenced by this child,0,500,0.0,,
+F250,PASS,3_referential,fact_fees,fact_fees.client_id -> dim_client.client_id,key text does not match parent text (format mismatch),0,122197,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F251,PASS,3_referential,fact_fees,fact_fees.client_id -> dim_client.client_id,orphan foreign key (no parent even after normalization),0,122197,0.0,,
+F252,PASS,3_referential,fact_fees,fact_fees.advisor_id -> dim_advisor.advisor_id,key text does not match parent text (format mismatch),0,122197,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F253,PASS,3_referential,fact_fees,fact_fees.advisor_id -> dim_advisor.advisor_id,orphan foreign key (no parent even after normalization),0,122197,0.0,,
+F254,PASS,3_referential,fact_fees,fact_fees.fee_date -> dim_date.date,key text does not match parent text (format mismatch),0,122197,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F255,PASS,3_referential,fact_fees,fact_fees.fee_date -> dim_date.date,orphan foreign key (no parent even after normalization),0,122197,0.0,,
+F256,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.client_id -> dim_client.client_id,key text does not match parent text (format mismatch),0,129547,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F257,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.client_id -> dim_client.client_id,orphan foreign key (no parent even after normalization),0,129547,0.0,,
+F258,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.advisor_id -> dim_advisor.advisor_id,key text does not match parent text (format mismatch),0,129547,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F259,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.advisor_id -> dim_advisor.advisor_id,orphan foreign key (no parent even after normalization),0,129547,0.0,,
+F260,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.benchmark_id -> dim_benchmark.benchmark_id,key text does not match parent text (format mismatch),0,129547,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F261,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.benchmark_id -> dim_benchmark.benchmark_id,orphan foreign key (no parent even after normalization),0,129547,0.0,,
+F262,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.snapshot_date -> dim_date.date,key text does not match parent text (format mismatch),0,129547,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F263,PASS,3_referential,fact_portfolio_snapshot,fact_portfolio_snapshot.snapshot_date -> dim_date.date,orphan foreign key (no parent even after normalization),0,129547,0.0,,
+F264,PASS,3_referential,fact_transactions,fact_transactions.client_id -> dim_client.client_id,key text does not match parent text (format mismatch),0,298772,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F265,PASS,3_referential,fact_transactions,fact_transactions.advisor_id -> dim_advisor.advisor_id,key text does not match parent text (format mismatch),0,298772,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F266,PASS,3_referential,fact_transactions,fact_transactions.advisor_id -> dim_advisor.advisor_id,orphan foreign key (no parent even after normalization),0,298772,0.0,,
+F267,PASS,3_referential,fact_transactions,fact_transactions.security_id -> dim_security.security_id,orphan foreign key (no parent even after normalization),0,197175,0.0,,
+F268,PASS,3_referential,fact_transactions,fact_transactions.txn_date -> dim_date.date,key text does not match parent text (format mismatch),0,298772,0.0,,matches only after normalization (strip / drop '.0'); a text or typed join will drop these
+F269,PASS,3_referential,fact_transactions,fact_transactions.txn_date -> dim_date.date,orphan foreign key (no parent even after normalization),0,298772,0.0,,
+F270,PASS,4_cross_table,dim_client,client_id,lookup key unique (duplicates: first row kept for this check),0,2525,0.0,,
+F271,PASS,4_cross_table,dim_client,is_active vs last snapshot,inactive client still has a 2024-12-01 snapshot,0,175,0.0,,
+F272,PASS,4_cross_table,dim_client,is_active vs last snapshot,active client with no 2024-12-01 snapshot,0,2325,0.0,,
+F273,PASS,4_cross_table,dim_security,security_id,lookup key unique (duplicates: first row kept for this check),0,500,0.0,,
+F274,PASS,4_cross_table,fact_fees,fact_fees.advisor_id vs dim_client.advisor_id,fact advisor = client's advisor,0,122197,0.0,,denominator = fact rows whose client exists
+F275,PASS,4_cross_table,fact_fees,fact_fees.fee_date vs dim_client.client_since,dated in a month before client_since,0,122197,0.0,,
+F276,PASS,4_cross_table,fact_fees,client_id+fee_date,lookup key unique (duplicates: first row kept for this check),0,122197,0.0,,
+F277,PASS,4_cross_table,fact_fees,fact_fees.aum_basis vs fact_portfolio_snapshot.aum,fee AUM basis = snapshot AUM for same client-month,0,122197,0.0,,tolerance $0.01
+F278,PASS,4_cross_table,fact_fees,fact_fees -> fact_portfolio_snapshot,fee month has a snapshot,0,122197,0.0,,
+F279,PASS,4_cross_table,fact_portfolio_snapshot,fact_portfolio_snapshot.advisor_id vs dim_client.advisor_id,fact advisor = client's advisor,0,129547,0.0,,denominator = fact rows whose client exists
+F280,PASS,4_cross_table,fact_portfolio_snapshot,fact_portfolio_snapshot.snapshot_date vs dim_client.client_since,dated in a month before client_since,0,129547,0.0,,
+F281,PASS,4_cross_table,fact_portfolio_snapshot,account_type vs dim_client.primary_account_type,snapshot account type = client primary account type,0,129547,0.0,,
+F282,PASS,4_cross_table,fact_portfolio_snapshot,benchmark_id vs dim_client.risk_profile,benchmark differs from the profile's usual benchmark,0,125605,0.0,,
+F283,PASS,4_cross_table,fact_portfolio_snapshot,client_id+snapshot_date,lookup key unique (duplicates: first row kept for this check),0,129547,0.0,,
+F284,PASS,4_cross_table,fact_portfolio_snapshot,client_id+snapshot_date,missing months inside a client's history,0,129547,0.0,,0 clients with gaps; denominator = months between each client's first and last snapshot
+F285,PASS,4_cross_table,fact_transactions,fact_transactions.advisor_id vs dim_client.advisor_id,fact advisor = client's advisor,0,298572,0.0,,denominator = fact rows whose client exists
+F286,PASS,4_cross_table,fact_transactions,fact_transactions.txn_date vs dim_client.client_since,dated before client_since but in the same month,0,298572,0.0,,
+F287,PASS,4_cross_table,fact_transactions,fact_transactions.txn_date vs dim_client.client_since,dated in a month before client_since,0,298572,0.0,,

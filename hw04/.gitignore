@@ -1,0 +1,7 @@
+
+.venv/
+__pycache__/
+*.pyc
+
+# Root .gitignore ignores *.csv; the report CSVs are required deliverables
+!reports/*.csv
