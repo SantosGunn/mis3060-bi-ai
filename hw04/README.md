@@ -1,6 +1,6 @@
 # HW04 – Wildcat Capital data-quality audit
 
-Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Part C (`scripts/02_clean.py`) is reviewed; Part D (`scripts/03_validate.py`) is reviewed; Part E is not started.
+Assignment: [HW04_Data_Cleaning.md](HW04_Data_Cleaning.md). Part A is done; Part B ([decision_log.md](decision_log.md)) is reviewed; Part C (`scripts/02_clean.py`) is reviewed; Part D (`scripts/03_validate.py`) is reviewed; Part E ([reports/cleaning_report.md](reports/cleaning_report.md)) is drafted and reviewed (Round 6), not yet committed.
 
 ## Structure
 
@@ -15,6 +15,7 @@ hw04/
   scripts/03_validate.py     Part D RI function, rules, reconciliations, IQR flags, scorecard
   reports/data_quality_scorecard.csv  Part D scorecard (8 tables x raw/clean)
   reports/validation_*.csv, validation_definitions.md  Part D detail and definitions
+  reports/cleaning_report.md Part E business report for the portfolio committee
   scripts/verify_setup.py    stale copy of the pre-review profiler (see "Noted, not changed")
   reports/profile_raw.csv    per-column profile
   reports/dq_summary_raw.csv one row per check
@@ -177,6 +178,64 @@ Reviewed `scripts/03_validate.py` and its 8 reports against Part D. Before any c
 | README main finding said Advisory Fee transactions "never reconcile". | Corrected to 1 of 28,746. |
 
 **Consistency after the changes:** `03_validate.py` was rerun after all code changes. All 8 Part D reports, including the scorecard, are byte-identical to the pre-change baseline.
+
+### Round 6 – Part E business report review
+
+Reviewed `reports/cleaning_report.md` against Part E in `HW04_Data_Cleaning.md`, the current `decision_log.md`, `reports/data_quality_scorecard.csv`, and the audit and validation outputs.
+
+**Required content: all present**
+- Executive summary: what improved and what still limits use.
+- Cleaning summary table (7 actions), plus a compact raw vs clean table.
+- Four judgment calls, each with evidence, decision with justification, and risk: probable duplicates, negative Buy shares, blank risk profiles, and the separate fee sources.
+- Limitations section, written as implications for BI.
+- Footer completed: "AI-assisted report — reviewed for factual accuracy on 10/26/2026 by Santos Gunningham".
+
+**Numbers verified**
+
+Every figure in the report was recomputed from the files on disk, not copied from earlier drafts. 34 checks, 0 mismatches.
+
+- **Scorecard:**
+  - row counts 2,525 / 298,772 raw and 2,500 / 298,572 clean;
+  - dim_client cell completeness 99.785% → 99.786% (denominator 35,000 cells clean);
+  - primary-key uniqueness 100% in all 16 table-stage rows.
+- **RI results:**
+  - security_id 0 of 197,175 nonblank keys matched raw, 100% clean;
+  - transaction client_id 99.933% → 100%;
+  - 13 of 13 clean relationships at 100%.
+- **Rule results:** 0 clean hard or inferred-convention failures; fee formula 122,197 of 122,197.
+- **Reconciliations:**
+  - R4: 1 passed, 28,745 failed, 28,746 matched client-months at both stages;
+  - R1: 122,197 of 122,197, with 7,350 snapshot months without a fee row.
+- **Audit:**
+  - 198,256 changed cells in `value_changes.csv`;
+  - cleaning log counts 25, 200, 197,044, 835, 300 and 77;
+  - quarantined orphan amount $10,888,495.37 (exact decimal sum).
+- **Clean tables:**
+  - 75 of 2,500 blank risk profiles (3.0%); raw 76 of 2,525 (3.01%);
+  - 6 flag columns, with sums 2,440 / 420 / 386 / 2,410 / 835 / 75;
+  - blank-profile clients use only benchmark 3;
+  - 40,630 of 143,218 clean Buys and Sells fall on non-trading days, which are exactly the weekends.
+- **Raw data:**
+  - 836 negative-share Buys, all reconciling within $0.01 when the sign is ignored, 1 of them quarantined;
+  - every amount is positive, and every Sell reconciles with positive shares.
+- **Near-duplicate evidence:** the kept IDs have 158 to 295 fact rows; Pacen and Leen are among the quarantined copies.
+- **IQR thresholds:** 251 clients and 6,257 transactions flagged at the clean stage.
+
+**Changed**
+
+| Flagged | Change |
+|---|---|
+| "cannot be corrected from any source" overstated what was tested. | Now "cannot be reliably corrected from the available extract". |
+| "Five review flags on unchanged values" and "Review flags (values unchanged)" were inaccurate. The flags change nothing, but 4 of the 2,440 return-outlier rows had `return_ytd` converted from `%` text, and 8 of the 2,410 after-last-snapshot rows had their Buy shares sign corrected. | Now "flags change no values" and "Review flags (they change no values)". |
+| Length. The draft was 1,043 words by `wc -w` (about 920 real words, since `wc` also counts table pipes and markdown markers) and rendered to about 2⅓ pages. | Condensed to 942 by `wc -w` (841 real words including table cells). The fee mismatch and the missing profiles are now each detailed once, in a judgment call, and only referenced elsewhere. The Advisory Fee and fact_transactions type-validity rows were dropped from the raw vs clean table, because the text covers them. Blank lines were added before lists so every Markdown renderer shows them as lists. No required element was removed. |
+
+**Page count:** the final page count cannot be fully verified, because Markdown has no fixed pages. Two test renders:
+- 11 pt Arial, US Letter, 1-inch margins (wkhtmltopdf): 2 pages, with page 2 about 60% full.
+- Pandoc's default Word template (12 pt, wider spacing), converted to PDF: 3 pages.
+
+Use 11 pt and 1-inch margins if the report is submitted as a PDF or Word file.
+
+**Scope:** only `reports/cleaning_report.md` and this README changed. No scripts, data or other reports changed. Not committed.
 
 ### Noted, not changed
 
