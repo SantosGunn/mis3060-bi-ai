@@ -1,0 +1,477 @@
+{
+  "generated_utc": "2026-11-12T00:28:53+00:00",
+  "source_data_dir": "hw05\\data",
+  "notes": [
+    "All values are independent pandas calculations from CSVs; none are Power BI results.",
+    "BLANK is written as null. Ratios are raw decimals (not multiplied by 100)."
+  ],
+  "data_validation": {
+    "dim_date": {
+      "rows": 1827,
+      "unique_dates": 1827,
+      "first_date": "2020-01-01",
+      "last_date": "2024-12-31",
+      "continuous": true,
+      "years": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ]
+    },
+    "dim_client": {
+      "rows": 2500,
+      "tier_counts": {
+        "Retail": 1510,
+        "HNW": 737,
+        "UHNW": 253
+      },
+      "is_active_counts": {
+        "True": 2325,
+        "False": 175
+      }
+    },
+    "fact_portfolio_snapshot": {
+      "rows": 129547,
+      "null_client_id_rows": 0,
+      "client_id_not_in_dim_client_rows": 0,
+      "client_id_not_in_dim_client_distinct": 0,
+      "mapped_rows_with_blank_tier": 0,
+      "null_date_rows": 0,
+      "date_not_in_dim_date_rows": 0,
+      "min_date": "2020-01-01",
+      "max_date": "2024-12-01",
+      "rows_in_duplicate_client_date_groups": 0,
+      "blank_aum": 0,
+      "blank_active_alpha_ytd": 0,
+      "blank_is_return_suspect": 0,
+      "is_return_suspect_counts": {
+        "0": 125672,
+        "1": 3875
+      },
+      "distinct_snapshot_dates": 60,
+      "snapshot_dates_not_on_day_1": 0
+    },
+    "fact_fees": {
+      "rows": 122197,
+      "null_client_id_rows": 0,
+      "client_id_not_in_dim_client_rows": 0,
+      "client_id_not_in_dim_client_distinct": 0,
+      "mapped_rows_with_blank_tier": 0,
+      "null_date_rows": 0,
+      "date_not_in_dim_date_rows": 0,
+      "min_date": "2020-01-01",
+      "max_date": "2024-12-01"
+    },
+    "fact_transactions": {
+      "rows": 298572,
+      "null_client_id_rows": 0,
+      "client_id_not_in_dim_client_rows": 0,
+      "client_id_not_in_dim_client_distinct": 0,
+      "mapped_rows_with_blank_tier": 0,
+      "null_date_rows": 0,
+      "date_not_in_dim_date_rows": 0,
+      "min_date": "2020-01-01",
+      "max_date": "2024-12-30",
+      "txn_type_counts": {
+        "Buy": 83498,
+        "Sell": 59720,
+        "Dividend": 53826,
+        "Deposit": 35956,
+        "Advisory Fee": 35742,
+        "Withdrawal": 29830
+      },
+      "negative_amount_deposit_or_withdrawal_rows": 0
+    }
+  },
+  "data_warnings": [],
+  "part_c": {
+    "a_ending_aum_vs_each_client_last_balance": {
+      "scope": "All clients (no is_active filter); Grand Total context.",
+      "global_latest_snapshot": "2024-12-01",
+      "grand_total_ending_aum": 12729572078.86,
+      "sum_of_each_clients_last_available_aum": 13149297713.8,
+      "difference_dollars_client_last_minus_ending_aum": 419725634.9399986,
+      "clients_with_snapshots": 2500,
+      "clients_last_snapshot_at_global_latest": 2325,
+      "clients_last_snapshot_before_global_latest": 175,
+      "aum_of_clients_whose_last_snapshot_predates_global_latest": 419725634.94,
+      "predating_clients_by_last_snapshot_year": {
+        "2022": 13,
+        "2023": 162
+      },
+      "predating_clients_by_dim_client_is_active": {
+        "False": 175
+      },
+      "check_sum_at_global_latest_equals_ending_aum_abs_diff": 0.0,
+      "dim_client_clients_with_no_snapshot_rows": 0
+    },
+    "b_fee_yield_2024": {
+      "scope": "Year=2024 (dim_date year), all tiers.",
+      "total_fees": 48714005.93,
+      "denominator_sum_snapshot_aum": 135459843783.73,
+      "denominator_sum_fee_aum_basis": 128385303527.1,
+      "fee_yield_bps_sum_fees_x12x10000_over_sum_snapshot_aum": 43.154344109040835,
+      "CANDIDATE_ICE9_effective_fee_rate_bps_sum_fees_x12x10000_over_sum_aum_basis": 45.532319907364425,
+      "candidate_label_note": "Candidate only: the ICE9 Effective Fee Rate definition has not been confirmed. This is NOT presented as the course measure.",
+      "fee_months": [
+        "2024-01",
+        "2024-02",
+        "2024-03",
+        "2024-04",
+        "2024-05",
+        "2024-06",
+        "2024-07",
+        "2024-08",
+        "2024-09",
+        "2024-10",
+        "2024-11",
+        "2024-12"
+      ],
+      "snapshot_months": [
+        "2024-01",
+        "2024-02",
+        "2024-03",
+        "2024-04",
+        "2024-05",
+        "2024-06",
+        "2024-07",
+        "2024-08",
+        "2024-09",
+        "2024-10",
+        "2024-11",
+        "2024-12"
+      ],
+      "fee_distinct_clients": 2325,
+      "snapshot_distinct_clients": 2325,
+      "client_months_with_both": 26216,
+      "client_months_snapshot_but_no_fee_rows": 1684,
+      "client_months_fee_rows_but_no_snapshot": 0,
+      "snapshot_aum_in_client_months_without_fees": 7074540256.63,
+      "fee_amount_in_client_months_without_snapshot": null,
+      "fee_rows_per_client_month_distribution": {
+        "1": 26216
+      },
+      "client_months_with_more_than_one_distinct_aum_basis": 0,
+      "sum_aum_basis_all_rows": 128385303527.1,
+      "sum_aum_basis_one_per_client_month_max": 128385303527.1,
+      "aligned_client_months_aum_basis_max_within_0.01_of_same_month_snapshot_aum": 26216,
+      "aligned_client_months_aum_basis_max_within_0.01_of_prior_month_snapshot_aum": 37,
+      "aligned_client_months_mean_abs_diff_basis_vs_same_month_snapshot": 0.0,
+      "fee_date_day_of_month_top10": {
+        "1": 26216
+      },
+      "fee_types": [
+        {
+          "fee_type": "Advisory",
+          "rows": 6909,
+          "amount": 12930305.28,
+          "aum_basis": 33918088324.94
+        },
+        {
+          "fee_type": "Custodial",
+          "rows": 2269,
+          "amount": 4110475.49,
+          "aum_basis": 10769563619.95
+        },
+        {
+          "fee_type": "Management",
+          "rows": 15320,
+          "amount": 28270205.66,
+          "aum_basis": 74784168047.53
+        },
+        {
+          "fee_type": "Performance",
+          "rows": 1718,
+          "amount": 3403019.5,
+          "aum_basis": 8913483534.68
+        }
+      ],
+      "monthly_coverage": [
+        {
+          "ym": "2024-01",
+          "fee_rows": 2171,
+          "fees": 3689022.39,
+          "aum_basis": 9663752352.88,
+          "fee_clients": 2171,
+          "snapshot_aum": 10739493964.48,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-02",
+          "fee_rows": 2153,
+          "fees": 3734194.39,
+          "aum_basis": 9787601896.6,
+          "fee_clients": 2153,
+          "snapshot_aum": 10678130485.2,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-03",
+          "fee_rows": 2178,
+          "fees": 3823231.49,
+          "aum_basis": 10062708953.62,
+          "fee_clients": 2178,
+          "snapshot_aum": 10742328678.37,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-04",
+          "fee_rows": 2170,
+          "fees": 3765383.98,
+          "aum_basis": 9895714149.21,
+          "fee_clients": 2170,
+          "snapshot_aum": 10646976112.92,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-05",
+          "fee_rows": 2174,
+          "fees": 3848621.34,
+          "aum_basis": 10172360976.81,
+          "fee_clients": 2174,
+          "snapshot_aum": 10639680259.25,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-06",
+          "fee_rows": 2163,
+          "fees": 3846473.05,
+          "aum_basis": 10127665943.49,
+          "fee_clients": 2163,
+          "snapshot_aum": 10912194235.6,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-07",
+          "fee_rows": 2175,
+          "fees": 4077392.14,
+          "aum_basis": 10837514318.27,
+          "fee_clients": 2175,
+          "snapshot_aum": 11227987599.58,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-08",
+          "fee_rows": 2194,
+          "fees": 4141111.8,
+          "aum_basis": 10997100212.55,
+          "fee_clients": 2194,
+          "snapshot_aum": 11473062833.06,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-09",
+          "fee_rows": 2206,
+          "fees": 4236110.2,
+          "aum_basis": 11096532549.04,
+          "fee_clients": 2206,
+          "snapshot_aum": 11598400078.9,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-10",
+          "fee_rows": 2187,
+          "fees": 4324671.81,
+          "aum_basis": 11356352031.7,
+          "fee_clients": 2187,
+          "snapshot_aum": 11860855009.57,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-11",
+          "fee_rows": 2211,
+          "fees": 4481763.66,
+          "aum_basis": 11874086091.52,
+          "fee_clients": 2211,
+          "snapshot_aum": 12211162447.94,
+          "snapshot_clients": 2325
+        },
+        {
+          "ym": "2024-12",
+          "fee_rows": 2234,
+          "fees": 4746029.68,
+          "aum_basis": 12513914051.41,
+          "fee_clients": 2234,
+          "snapshot_aum": 12729572078.86,
+          "snapshot_clients": 2325
+        }
+      ],
+      "note": "Differences are quantified here; no cause is asserted by this script."
+    },
+    "c_alpha_exclusion": {
+      "grand_total_latest_snapshot": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 2325,
+        "eligible_rows": 2177,
+        "excluded_suspect_rows": 148,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 15543506.100000001,
+        "weighted_numerator": 184098457.35441887,
+        "eligible_aum_denominator": 12714028572.76,
+        "aum_weighted_alpha": 0.01447994680056427,
+        "weighted_alpha_including_suspects": 0.01667843242874973,
+        "eligible_simple_mean_alpha": 0.008788000918695454
+      },
+      "year_2024": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 2325,
+        "eligible_rows": 2177,
+        "excluded_suspect_rows": 148,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 15543506.100000001,
+        "weighted_numerator": 184098457.35441887,
+        "eligible_aum_denominator": 12714028572.76,
+        "aum_weighted_alpha": 0.01447994680056427,
+        "weighted_alpha_including_suspects": 0.01667843242874973,
+        "eligible_simple_mean_alpha": 0.008788000918695454
+      },
+      "same_latest_snapshot": true
+    },
+    "d_tier_growth_2024": {
+      "tiers": {
+        "Year=2024|Tier=HNW": {
+          "net_flows": 25227406.260000005,
+          "ending_aum_ly": 2130154150.42,
+          "ending_aum": 2548521154.33,
+          "organic_growth_rate": 0.011842995613733375,
+          "aum_yoy_pct": 0.19640221991798618,
+          "aum_change_dollars": 418367003.90999985,
+          "aum_change_minus_net_flows": 393139597.64999986
+        },
+        "Year=2024|Tier=Retail": {
+          "net_flows": 44184047.609999985,
+          "ending_aum_ly": 447795648.67,
+          "ending_aum": 533452497.89,
+          "organic_growth_rate": 0.09867011379237657,
+          "aum_yoy_pct": 0.19128557741552377,
+          "aum_change_dollars": 85656849.21999997,
+          "aum_change_minus_net_flows": 41472801.609999985
+        },
+        "Year=2024|Tier=UHNW": {
+          "net_flows": 8101601.389999993,
+          "ending_aum_ly": 8067021937.91,
+          "ending_aum": 9647598426.64,
+          "organic_growth_rate": 0.0010042865201503285,
+          "aum_yoy_pct": 0.19593060498599493,
+          "aum_change_dollars": 1580576488.7299995,
+          "aum_change_minus_net_flows": 1572474887.3399994
+        }
+      },
+      "note": "aum_change_minus_net_flows is the part of the AUM change that net contributions do not explain. It is NOT attributed here to investment returns; it can also reflect fees, other transactions, client entry/exit and data effects."
+    }
+  },
+  "part_d_alpha_diagnostics": {
+    "contexts": {
+      "Grand Total": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 2325,
+        "eligible_rows": 2177,
+        "excluded_suspect_rows": 148,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 15543506.100000001,
+        "weighted_numerator": 184098457.35441887,
+        "eligible_aum_denominator": 12714028572.76,
+        "aum_weighted_alpha": 0.01447994680056427,
+        "weighted_alpha_including_suspects": 0.01667843242874973,
+        "eligible_simple_mean_alpha": 0.008788000918695454
+      },
+      "Year=2022": {
+        "latest_snapshot": "2022-12-01",
+        "rows_at_latest": 2500,
+        "eligible_rows": 2421,
+        "excluded_suspect_rows": 79,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 5591267.44,
+        "weighted_numerator": 265068023.48606542,
+        "eligible_aum_denominator": 9302568019.09,
+        "aum_weighted_alpha": 0.028494069910815337,
+        "weighted_alpha_including_suspects": 0.030744571693697754,
+        "eligible_simple_mean_alpha": 0.02668107930607187
+      },
+      "Year=2024|Tier=HNW": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 687,
+        "eligible_rows": 687,
+        "excluded_suspect_rows": 0,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": null,
+        "weighted_numerator": 35648823.051915586,
+        "eligible_aum_denominator": 2548521154.33,
+        "aum_weighted_alpha": 0.01398804282685563,
+        "weighted_alpha_including_suspects": 0.01398804282685563,
+        "eligible_simple_mean_alpha": 0.01348191557496361
+      },
+      "Year=2024|Tier=Retail": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 1394,
+        "eligible_rows": 1246,
+        "excluded_suspect_rows": 148,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 15543506.100000001,
+        "weighted_numerator": 12451054.69335247,
+        "eligible_aum_denominator": 517908991.78999996,
+        "aum_weighted_alpha": 0.024041008923824755,
+        "weighted_alpha_including_suspects": 0.07622404106069809,
+        "eligible_simple_mean_alpha": 0.0052671886035312995
+      },
+      "Year=2024|Tier=UHNW": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 244,
+        "eligible_rows": 244,
+        "excluded_suspect_rows": 0,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": null,
+        "weighted_numerator": 135998579.60915086,
+        "eligible_aum_denominator": 9647598426.64,
+        "aum_weighted_alpha": 0.014096625252727847,
+        "weighted_alpha_including_suspects": 0.014096625252727847,
+        "eligible_simple_mean_alpha": 0.013551168032786885
+      }
+    },
+    "no_data_context_year_1900": {
+      "dim_date_rows_in_1900": 0,
+      "diagnostics": {
+        "latest_snapshot": null,
+        "rows_at_latest": 0,
+        "eligible_rows": 0,
+        "excluded_suspect_rows": 0,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": null,
+        "weighted_numerator": null,
+        "eligible_aum_denominator": null,
+        "aum_weighted_alpha": null,
+        "weighted_alpha_including_suspects": null,
+        "eligible_simple_mean_alpha": null
+      },
+      "expected": "All values BLANK (null), eligible_rows = 0."
+    },
+    "all_latest_rows_suspect_client_year": {
+      "exercised": true,
+      "candidate_count": 570,
+      "context": {
+        "dim_client.client_id": 29,
+        "dim_date.year": 2024
+      },
+      "diagnostics": {
+        "latest_snapshot": "2024-12-01",
+        "rows_at_latest": 1,
+        "eligible_rows": 0,
+        "excluded_suspect_rows": 1,
+        "excluded_blank_value_rows": 0,
+        "excluded_suspect_aum": 157808.88,
+        "weighted_numerator": null,
+        "eligible_aum_denominator": null,
+        "aum_weighted_alpha": null,
+        "weighted_alpha_including_suspects": 0.6714,
+        "eligible_simple_mean_alpha": null
+      },
+      "expected": "aum_weighted_alpha is BLANK and latest_snapshot is the year's latest date.",
+      "fallback_value_that_must_NOT_be_returned": {
+        "date": "2024-02-01",
+        "alpha": 0.106621
+      }
+    }
+  }
+}
